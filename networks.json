@@ -3,6 +3,9 @@
     "AssetPoolFactory": {
       "address": "0xF225f028F7cd2CbEF1C882224e4ae97AbBd352Dc",
       "startBlock": 24505587
+    },
+    "ProtocolRegistry": {
+      "address": "0xCEaBF7ed92bCA91920316f015C92F61a4F8bE761"
     }
   }
 }

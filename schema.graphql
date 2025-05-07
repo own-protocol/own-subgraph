@@ -35,3 +35,38 @@ type RegistryUpdated @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+type OracleVerificationUpdated @entity(immutable: true) {
+  id: Bytes!
+  oracle: Bytes! # address
+  isVerified: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ProtocolRegistryOwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PoolVerificationUpdated @entity(immutable: true) {
+  id: Bytes!
+  pool: Bytes! # address
+  isVerified: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type StrategyVerificationUpdated @entity(immutable: true) {
+  id: Bytes!
+  strategy: Bytes! # address
+  isVerified: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
