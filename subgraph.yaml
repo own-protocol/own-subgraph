@@ -1,0 +1,35 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: AssetPoolFactory
+    network: base-sepolia
+    source:
+      address: "0xF225f028F7cd2CbEF1C882224e4ae97AbBd352Dc"
+      abi: AssetPoolFactory
+      startBlock: 24505587
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - AssetOracleCreated
+        - AssetPoolCreated
+        - OwnershipTransferred
+        - RegistryUpdated
+      abis:
+        - name: AssetPoolFactory
+          file: ./abis/AssetPoolFactory.json
+      eventHandlers:
+        - event: AssetOracleCreated(indexed address,string)
+          handler: handleAssetOracleCreated
+        - event: AssetPoolCreated(indexed address,string,address,address)
+          handler: handleAssetPoolCreated
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RegistryUpdated(indexed address,indexed address)
+          handler: handleRegistryUpdated
+      file: ./src/asset-pool-factory.ts

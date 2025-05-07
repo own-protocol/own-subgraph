@@ -1,0 +1,37 @@
+type AssetOracleCreated @entity(immutable: true) {
+  id: Bytes!
+  oracle: Bytes! # address
+  assetSymbol: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AssetPoolCreated @entity(immutable: true) {
+  id: Bytes!
+  pool: Bytes! # address
+  assetSymbol: String! # string
+  depositToken: Bytes! # address
+  oracle: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RegistryUpdated @entity(immutable: true) {
+  id: Bytes!
+  oldRegistry: Bytes! # address
+  newRegistry: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

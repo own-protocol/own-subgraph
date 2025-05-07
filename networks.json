@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "AssetPoolFactory": {
+      "address": "0xF225f028F7cd2CbEF1C882224e4ae97AbBd352Dc",
+      "startBlock": 24505587
+    }
+  }
+}
