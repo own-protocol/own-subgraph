@@ -20,9 +20,19 @@ dataSources:
         - AssetPoolCreated
         - OwnershipTransferred
         - RegistryUpdated
+        - VerifiedPool
+        - VerifiedOracle
       abis:
         - name: AssetPoolFactory
           file: ./abis/AssetPoolFactory.json
+        - name: AssetPool
+          file: ./abis/AssetPool.json
+        - name: XToken
+          file: ./abis/XToken.json
+        - name: AssetOracle
+          file: ./abis/AssetOracle.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: AssetOracleCreated(indexed address,string)
           handler: handleAssetOracleCreated
@@ -33,6 +43,7 @@ dataSources:
         - event: RegistryUpdated(indexed address,indexed address)
           handler: handleRegistryUpdated
       file: ./src/asset-pool-factory.ts
+
   - kind: ethereum
     name: ProtocolRegistry
     network: base-sepolia
@@ -49,9 +60,14 @@ dataSources:
         - ProtocolRegistryOwnershipTransferred
         - PoolVerificationUpdated
         - StrategyVerificationUpdated
+        - VerifiedPool
+        - VerifiedOracle
+        - VerifiedStrategy
       abis:
         - name: ProtocolRegistry
           file: ./abis/ProtocolRegistry.json
+        - name: DefaultPoolStrategy
+          file: ./abis/DefaultPoolStrategy.json
       eventHandlers:
         - event: OracleVerificationUpdated(indexed address,bool)
           handler: handleOracleVerificationUpdated
@@ -61,4 +77,117 @@ dataSources:
           handler: handlePoolVerificationUpdated
         - event: StrategyVerificationUpdated(indexed address,bool)
           handler: handleStrategyVerificationUpdated
+      file: ./src/protocol-registry.ts
+
+templates:
+  - kind: ethereum
+    name: AssetPool
+    network: base-sepolia
+    source:
+      abi: AssetPool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - VerifiedPool
+      abis:
+        - name: AssetPool
+          file: ./abis/AssetPool.json
+        - name: XToken
+          file: ./abis/XToken.json
+      eventHandlers:
+        - event: CollateralDeposited(indexed address,uint256)
+          handler: handleCollateralDeposited
+        - event: CollateralWithdrawn(indexed address,uint256)
+          handler: handleCollateralWithdrawn
+        - event: DepositRequested(indexed address,uint256,indexed uint256)
+          handler: handleDepositRequested
+        - event: AssetClaimed(indexed address,uint256,indexed uint256)
+          handler: handleAssetClaimed
+        - event: RedemptionRequested(indexed address,uint256,indexed uint256)
+          handler: handleRedemptionRequested
+        - event: ReserveWithdrawn(indexed address,uint256,indexed uint256)
+          handler: handleReserveWithdrawn
+        - event: LiquidationRequested(indexed address,address,indexed uint256,indexed uint256)
+          handler: handleLiquidationRequested
+        - event: LiquidationClaimed(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleLiquidationClaimed
+        - event: LiquidationCancelled(indexed address,indexed address,uint256)
+          handler: handleLiquidationCancelled
+      file: ./src/asset-pool.ts
+
+  - kind: ethereum
+    name: XToken
+    network: base-sepolia
+    source:
+      abi: XToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - VerifiedPool
+      abis:
+        - name: XToken
+          file: ./abis/XToken.json
+      # No event handlers needed, will be updated through AssetPool handlers
+      file: ./src/asset-pool.ts
+
+  - kind: ethereum
+    name: AssetOracle
+    network: base-sepolia
+    source:
+      abi: AssetOracle
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - VerifiedOracle
+        - VerifiedPool
+      abis:
+        - name: AssetOracle
+          file: ./abis/AssetOracle.json
+      eventHandlers:
+        - event: AssetPriceUpdated(uint256,uint256)
+          handler: handleAssetPriceUpdated
+        - event: OHLCDataUpdated(uint256,uint256,uint256,uint256,uint256)
+          handler: handleOHLCDataUpdated
+        - event: SplitDetected(uint256,uint256,uint256)
+          handler: handleSplitDetected
+      file: ./src/asset-oracle.ts
+
+  - kind: ethereum
+    name: ERC20
+    network: base-sepolia
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - VerifiedPool
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      # No event handlers needed, will be updated through AssetPool handlers
+      file: ./src/asset-pool.ts
+
+  - kind: ethereum
+    name: DefaultPoolStrategy
+    network: base-sepolia
+    source:
+      abi: DefaultPoolStrategy
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - VerifiedStrategy
+      abis:
+        - name: DefaultPoolStrategy
+          file: ./abis/DefaultPoolStrategy.json
+      # No event handlers needed, will be updated through registry handlers
       file: ./src/protocol-registry.ts
