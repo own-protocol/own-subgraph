@@ -35,6 +35,7 @@ type RegistryUpdated @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
 type OracleVerificationUpdated @entity(immutable: true) {
   id: Bytes!
   oracle: Bytes! # address
@@ -69,4 +70,60 @@ type StrategyVerificationUpdated @entity(immutable: true) {
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
+}
+
+type Pool @entity(immutable: false) {
+  id: Bytes! # pool address
+  assetSymbol: String!
+  depositToken: Bytes! # reserve token address
+  reserveTokenName: String
+  reserveTokenSymbol: String
+  reserveTokenDecimals: Int
+  assetToken: Bytes! # xToken address
+  assetTokenName: String
+  assetTokenSymbol: String
+  assetTokenDecimals: Int
+  oracle: Bytes! # oracle address
+  currentAssetPrice: BigInt
+  poolStrategy: Bytes! # strategy address
+  poolCycleManager: Bytes!
+  poolLiquidityManager: Bytes!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  isVerified: Boolean!
+  totalSupply: BigInt
+  reserveBackingAsset: BigInt
+  totalUserDeposits: BigInt
+  totalUserCollateral: BigInt
+  totalLPLiquidityCommited: BigInt
+  totalLPCollateral: BigInt
+  cycleState: String
+  cycleIndex: BigInt
+  lpCount: BigInt
+}
+
+type Oracle @entity(immutable: false) {
+  id: Bytes! # oracle address
+  assetSymbol: String!
+  assetPrice: BigInt
+  lastUpdated: BigInt
+  isVerified: Boolean!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  pool: Bytes
+}
+
+type Strategy @entity(immutable: false) {
+  id: Bytes! # strategy address
+  isVerified: Boolean!
+  baseInterestRate: BigInt
+  interestRate1: BigInt
+  maxInterestRate: BigInt
+  utilizationTier1: BigInt
+  utilizationTier2: BigInt
+  protocolFee: BigInt
+  feeRecipient: Bytes
+  isYieldBearing: Boolean
+  createdAt: BigInt!
+  updatedAt: BigInt!
 }
