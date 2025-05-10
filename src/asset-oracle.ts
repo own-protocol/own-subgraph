@@ -21,8 +21,9 @@ export function handleAssetPriceUpdated(event: AssetPriceUpdated): void {
 
     // Find and update the pool that uses this oracle
     // Since each pool has a dedicated oracle, we can look up by oracle address
-    if (oracle.pool) {
-      let pool = Pool.load(oracle.pool);
+    let poolAddress = oracle.pool;
+    if (poolAddress !== null) {
+      let pool = Pool.load(poolAddress);
       if (pool) {
         pool.currentAssetPrice = event.params.price;
         pool.updatedAt = event.block.timestamp;
@@ -52,8 +53,9 @@ export function handleSplitDetected(event: SplitDetected): void {
     oracle.save();
 
     // Find and update the pool that uses this oracle
-    if (oracle.pool) {
-      let pool = Pool.load(oracle.pool);
+    let poolAddress = oracle.pool;
+    if (poolAddress !== null) {
+      let pool = Pool.load(poolAddress);
       if (pool) {
         pool.currentAssetPrice = event.params.newPrice;
         pool.updatedAt = event.block.timestamp;
