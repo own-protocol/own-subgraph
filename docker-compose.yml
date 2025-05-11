@@ -19,7 +19,8 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: "ipfs:5001"
-      ethereum: "mainnet:http://host.docker.internal:8545"
+      #ethereum: "mainnet:http://host.docker.internal:8545"
+      ethereum: "base-sepolia:https://sepolia.base.org"
       GRAPH_LOG: info
   ipfs:
     image: ipfs/kubo:v0.17.0
@@ -30,7 +31,7 @@ services:
   postgres:
     image: postgres:14
     ports:
-      - "5432:5432"
+      - "5433:5432"
     command:
       [
         "postgres",

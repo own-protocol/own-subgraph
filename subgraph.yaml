@@ -20,8 +20,8 @@ dataSources:
         - AssetPoolCreated
         - OwnershipTransferred
         - RegistryUpdated
-        - VerifiedPool
-        - VerifiedOracle
+        - Pool
+        - Oracle
       abis:
         - name: AssetPoolFactory
           file: ./abis/AssetPoolFactory.json
@@ -60,9 +60,9 @@ dataSources:
         - ProtocolRegistryOwnershipTransferred
         - PoolVerificationUpdated
         - StrategyVerificationUpdated
-        - VerifiedPool
-        - VerifiedOracle
-        - VerifiedStrategy
+        - Pool
+        - Oracle
+        - Strategy
       abis:
         - name: ProtocolRegistry
           file: ./abis/ProtocolRegistry.json
@@ -90,7 +90,7 @@ templates:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - VerifiedPool
+        - Pool
       abis:
         - name: AssetPool
           file: ./abis/AssetPool.json
@@ -127,7 +127,7 @@ templates:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - VerifiedPool
+        - Pool
       abis:
         - name: XToken
           file: ./abis/XToken.json
@@ -144,8 +144,8 @@ templates:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - VerifiedOracle
-        - VerifiedPool
+        - Oracle
+        - Pool
       abis:
         - name: AssetOracle
           file: ./abis/AssetOracle.json
@@ -168,7 +168,7 @@ templates:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - VerifiedPool
+        - Pool
       abis:
         - name: ERC20
           file: ./abis/ERC20.json
