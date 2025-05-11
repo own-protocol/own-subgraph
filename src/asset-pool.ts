@@ -18,39 +18,45 @@ export function handlePoolStateChange(
   address: Address,
   blockTimestamp: BigInt
 ): void {
-  let pool = Pool.load(address);
-  if (pool) {
-    // Update from contract
-    let assetPoolContract = AssetPool.bind(address);
-
-    // Get Pool Info
-    let totalUserDepositsCall = assetPoolContract.try_totalUserDeposits();
-    if (!totalUserDepositsCall.reverted) {
-      pool.totalUserDeposits = totalUserDepositsCall.value;
-    }
-
-    let totalUserCollateralCall = assetPoolContract.try_totalUserCollateral();
-    if (!totalUserCollateralCall.reverted) {
-      pool.totalUserCollateral = totalUserCollateralCall.value;
-    }
-
-    let reserveBackingAssetCall = assetPoolContract.try_reserveBackingAsset();
-    if (!reserveBackingAssetCall.reverted) {
-      pool.reserveBackingAsset = reserveBackingAssetCall.value;
-    }
-
-    // Get total supply from xToken
-    if (pool.assetToken !== Address.zero()) {
-      let xToken = XToken.bind(pool.assetToken as Address);
-      let totalSupplyCall = xToken.try_totalSupply();
-      if (!totalSupplyCall.reverted) {
-        pool.totalSupply = totalSupplyCall.value;
-      }
-    }
-
-    pool.updatedAt = blockTimestamp;
-    pool.save();
+  if (!address) {
+    return;
   }
+
+  let pool = Pool.load(address);
+
+  if (!pool) {
+    return;
+  }
+  // Update from contract
+  let assetPoolContract = AssetPool.bind(address);
+
+  // Get Pool Info
+  let totalUserDepositsCall = assetPoolContract.try_totalUserDeposits();
+  if (!totalUserDepositsCall.reverted) {
+    pool.totalUserDeposits = totalUserDepositsCall.value;
+  }
+
+  let totalUserCollateralCall = assetPoolContract.try_totalUserCollateral();
+  if (!totalUserCollateralCall.reverted) {
+    pool.totalUserCollateral = totalUserCollateralCall.value;
+  }
+
+  let reserveBackingAssetCall = assetPoolContract.try_reserveBackingAsset();
+  if (!reserveBackingAssetCall.reverted) {
+    pool.reserveBackingAsset = reserveBackingAssetCall.value;
+  }
+
+  // Get total supply from xToken
+  if (pool.assetToken !== Address.zero()) {
+    let xToken = XToken.bind(pool.assetToken as Address);
+    let totalSupplyCall = xToken.try_totalSupply();
+    if (!totalSupplyCall.reverted) {
+      pool.totalSupply = totalSupplyCall.value;
+    }
+  }
+
+  pool.updatedAt = blockTimestamp;
+  pool.save();
 }
 
 export function handleCollateralDeposited(event: CollateralDeposited): void {
