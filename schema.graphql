@@ -16,26 +16,56 @@ type Pool @entity(immutable: false) {
   createdAt: BigInt!
   updatedAt: BigInt!
   isVerified: Boolean!
-  totalSupply: BigInt
+
+  # Asset Pool Data
+  assetSupply: BigInt
   reserveBackingAsset: BigInt
+  aggregatePoolReserves: BigInt
   totalUserDeposits: BigInt
   totalUserCollateral: BigInt
+  cycleTotalDeposits: BigInt
+  cycleTotalRedemptions: BigInt
+  reserveYieldAccrued: BigInt
+
+  # Liquidity Manager Data
   totalLPLiquidityCommited: BigInt
   totalLPCollateral: BigInt
-  cycleState: String
-  cycleIndex: BigInt
   lpCount: BigInt
+  cycleTotalAddLiquidityAmount: BigInt
+  cycleTotalReduceLiquidityAmount: BigInt
+
+  # Cycle Manager Data
+  cycleState: String # enum: POOL_ACTIVE, POOL_REBALANCING_OFFCHAIN, POOL_REBALANCING_ONCHAIN, POOL_HALTED
+  cycleIndex: BigInt
+  lastCycleActionDateTime: BigInt
+  cyclePriceHigh: BigInt
+  cyclePriceLow: BigInt
+  cycleInterestAmount: BigInt
+  rebalancedLPs: BigInt
+
+  # Relations
+  users: [UserPosition!]! @derivedFrom(field: "pool")
+  lpPositions: [LPPosition!]! @derivedFrom(field: "pool")
+  cycles: [Cycle!]! @derivedFrom(field: "pool")
+  strategy: Strategy @derivedFrom(field: "pools")
 }
 
 type Oracle @entity(immutable: false) {
   id: Bytes! # oracle address
   assetSymbol: String!
   assetPrice: BigInt
+  ohlcOpen: BigInt
+  ohlcHigh: BigInt
+  ohlcLow: BigInt
+  ohlcClose: BigInt
+  ohlcTimestamp: BigInt
   lastUpdated: BigInt
   isVerified: Boolean!
   createdAt: BigInt!
   updatedAt: BigInt!
   pool: Bytes
+  splitDetected: Boolean
+  preSplitPrice: BigInt
 }
 
 type Strategy @entity(immutable: false) {
@@ -49,6 +79,151 @@ type Strategy @entity(immutable: false) {
   protocolFee: BigInt
   feeRecipient: Bytes
   isYieldBearing: Boolean
+
+  # Collateral parameters
+  userHealthyCollateralRatio: BigInt
+  userLiquidationThreshold: BigInt
+  lpHealthyCollateralRatio: BigInt
+  lpLiquidationThreshold: BigInt
+  lpBaseCollateralRatio: BigInt
+  lpLiquidationReward: BigInt
+
+  # Cycle parameters
+  rebalanceLength: BigInt
+  oracleUpdateThreshold: BigInt
+  haltThreshold: BigInt
+
   createdAt: BigInt!
   updatedAt: BigInt!
+
+  # Relation
+  pools: [Pool!]! @derivedFrom(field: "poolStrategy")
+}
+
+# Entity to track user positions
+type UserPosition @entity(immutable: false) {
+  id: ID! # user address + pool address
+  user: Bytes! # user address
+  pool: Pool!
+  assetAmount: BigInt!
+  depositAmount: BigInt!
+  collateralAmount: BigInt!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+
+  # Health metrics
+  collateralHealth: Int # 3 = Healthy, 2 = Warning, 1 = Liquidatable
+  # Relations
+  request: UserRequest @derivedFrom(field: "userPosition")
+}
+
+# Entity to track user requests
+type UserRequest @entity(immutable: false) {
+  id: ID! # user address + pool address + requestCycle
+  userPosition: UserPosition!
+  requestType: String! # NONE, DEPOSIT, REDEEM, LIQUIDATE
+  amount: BigInt!
+  collateralAmount: BigInt
+  requestCycle: BigInt!
+  liquidator: Bytes # only set if requestType is LIQUIDATE
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  status: String! # PENDING, COMPLETED, CANCELLED
+}
+
+# Entity to track LP positions
+type LPPosition @entity(immutable: false) {
+  id: ID! # lp address + pool address
+  lp: Bytes! # lp address
+  pool: Pool!
+  liquidityCommitment: BigInt!
+  collateralAmount: BigInt!
+  interestAccrued: BigInt!
+
+  # Health metrics
+  liquidityHealth: Int # 3 = Healthy, 2 = Warning, 1 = Liquidatable
+  # LP analytics
+  assetHoldingValue: BigInt
+  liquidityShare: BigInt # in PRECISION (1e18)
+  assetShare: BigInt
+
+  createdAt: BigInt!
+  updatedAt: BigInt!
+
+  # Relations
+  request: LPRequest @derivedFrom(field: "lpPosition")
+  rebalanceHistory: [LPRebalance!]! @derivedFrom(field: "lpPosition")
+}
+
+# Entity to track LP requests
+type LPRequest @entity(immutable: false) {
+  id: ID! # lp address + pool address + requestCycle
+  lpPosition: LPPosition!
+  requestType: String! # NONE, ADD_LIQUIDITY, REDUCE_LIQUIDITY, LIQUIDATE
+  requestAmount: BigInt!
+  requestCycle: BigInt!
+  liquidator: Bytes # only set if requestType is LIQUIDATE
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  status: String! # PENDING, COMPLETED, CANCELLED
+}
+
+# Entity to track LP rebalance actions
+type LPRebalance @entity(immutable: false) {
+  id: ID! # lp address + pool address + cycleIndex
+  lpPosition: LPPosition!
+  cycleIndex: BigInt!
+  rebalancePrice: BigInt!
+  amount: BigInt!
+  isDeposit: Boolean!
+  timestamp: BigInt!
+  wasSettled: Boolean! # true if LP didn't rebalance and was settled automatically
+}
+
+# Entity to track cycle data
+type Cycle @entity(immutable: false) {
+  id: ID! # pool address + cycle index
+  pool: Pool!
+  cycleIndex: BigInt!
+  state: String! # POOL_ACTIVE, POOL_REBALANCING_OFFCHAIN, POOL_REBALANCING_ONCHAIN, POOL_HALTED
+  startTime: BigInt!
+  endTime: BigInt
+  rebalancePrice: BigInt
+  cyclePoolInterest: BigInt
+  priceHigh: BigInt
+  priceLow: BigInt
+
+  # Stats for the cycle
+  totalDeposits: BigInt!
+  totalRedemptions: BigInt!
+  totalAddLiquidity: BigInt!
+  totalReduceLiquidity: BigInt!
+  lpCount: BigInt!
+  rebalancedLPs: BigInt!
+
+  # Relations
+  rebalances: [LPRebalance!]! @derivedFrom(field: "cycleIndex")
+}
+
+# Entity to track protocol events
+type ProtocolEvent @entity(immutable: false) {
+  id: ID! # tx hash + log index
+  pool: Pool
+  eventType: String! # DEPOSIT, REDEEM, LIQUIDATION, REBALANCE, etc.
+  user: Bytes
+  amount: BigInt
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
+}
+
+# Entity to track fee collection
+type FeeEvent @entity(immutable: false) {
+  id: ID! # tx hash + log index
+  pool: Pool!
+  user: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
 }
