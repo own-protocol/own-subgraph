@@ -118,6 +118,7 @@ export function handleRebalanced(event: Rebalanced): void {
     if (lpPosition != null) {
       let rebalanceId = lpPositionId + "-" + cycleIndex.toString();
       let lpRebalance = new LPRebalance(rebalanceId);
+      lpRebalance.cycle = cycleId;
       lpRebalance.lpPosition = lpPositionId;
       lpRebalance.cycleIndex = cycleIndex;
       lpRebalance.rebalancePrice = rebalancePrice;

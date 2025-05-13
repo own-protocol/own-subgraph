@@ -97,7 +97,7 @@ type Strategy @entity(immutable: false) {
   updatedAt: BigInt!
 
   # Relation
-  pools: [Pool!]! @derivedFrom(field: "poolStrategy")
+  pools: [Pool!]! @derivedFrom(field: "strategy")
 }
 
 # Entity to track user positions
@@ -173,6 +173,7 @@ type LPRebalance @entity(immutable: false) {
   id: ID! # lp address + pool address + cycleIndex
   lpPosition: LPPosition!
   cycleIndex: BigInt!
+  cycle: Cycle!
   rebalancePrice: BigInt!
   amount: BigInt!
   isDeposit: Boolean!
@@ -202,7 +203,7 @@ type Cycle @entity(immutable: false) {
   rebalancedLPs: BigInt!
 
   # Relations
-  rebalances: [LPRebalance!]! @derivedFrom(field: "cycleIndex")
+  rebalances: [LPRebalance!]! @derivedFrom(field: "cycle")
 }
 
 # Entity to track protocol events

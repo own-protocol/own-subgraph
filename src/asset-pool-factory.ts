@@ -89,7 +89,7 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.assetToken = assetTokenAddress;
   pool.poolCycleManager = poolCycleManagerAddress;
   pool.poolLiquidityManager = poolLiquidityManagerAddress;
-  pool.poolStrategy = poolStrategyAddress; // This creates the relationship with Strategy
+  pool.strategy = poolStrategyAddress; // This creates the relationship with Strategy
   pool.createdAt = event.block.timestamp;
   pool.updatedAt = event.block.timestamp;
   pool.isVerified = false;
