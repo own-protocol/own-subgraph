@@ -4,23 +4,10 @@ import {
   OwnershipTransferred as OwnershipTransferredEvent,
   RegistryUpdated as RegistryUpdatedEvent,
 } from "../generated/AssetPoolFactory/AssetPoolFactory";
-import {
-  AssetOracleCreated,
-  AssetPoolCreated,
-  OwnershipTransferred,
-  RegistryUpdated,
-  Pool,
-  Oracle,
-} from "../generated/schema";
+import { Pool, Oracle } from "../generated/schema";
 import { AssetPool } from "../generated/templates/AssetPool/AssetPool";
 import { XToken } from "../generated/templates/XToken/XToken";
-import { AssetOracle } from "../generated/templates/AssetOracle/AssetOracle";
 import { ERC20 } from "../generated/templates/ERC20/ERC20";
-import {
-  DataSourceContext,
-  dataSource,
-  ethereum,
-} from "@graphprotocol/graph-ts";
 import {
   AssetPool as AssetPoolTemplate,
   XToken as XTokenTemplate,
@@ -28,20 +15,8 @@ import {
   ERC20 as ERC20Template,
 } from "../generated/templates";
 import { Address, BigInt } from "@graphprotocol/graph-ts";
-import { ProtocolRegistry } from "../generated/ProtocolRegistry/ProtocolRegistry";
 
 export function handleAssetOracleCreated(event: AssetOracleCreatedEvent): void {
-  let entity = new AssetOracleCreated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.oracle = event.params.oracle;
-  entity.assetSymbol = event.params.assetSymbol;
-
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-
   // Create a Oracle entity
   let oracle = new Oracle(event.params.oracle);
   oracle.assetSymbol = event.params.assetSymbol;
@@ -57,19 +32,6 @@ export function handleAssetOracleCreated(event: AssetOracleCreatedEvent): void {
 }
 
 export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
-  let entity = new AssetPoolCreated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.pool = event.params.pool;
-  entity.assetSymbol = event.params.assetSymbol;
-  entity.depositToken = event.params.depositToken;
-  entity.oracle = event.params.oracle;
-
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-
   // Create templates for tracking the newly created contracts
   AssetPoolTemplate.create(event.params.pool);
   ERC20Template.create(event.params.depositToken);
@@ -184,29 +146,9 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
 export function handleOwnershipTransferred(
   event: OwnershipTransferredEvent
 ): void {
-  let entity = new OwnershipTransferred(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.previousOwner = event.params.previousOwner;
-  entity.newOwner = event.params.newOwner;
-
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-
-  entity.save();
+  return; // No action needed for ownership transfer
 }
 
 export function handleRegistryUpdated(event: RegistryUpdatedEvent): void {
-  let entity = new RegistryUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.oldRegistry = event.params.oldRegistry;
-  entity.newRegistry = event.params.newRegistry;
-
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-
-  entity.save();
+  return; // No action needed for registry update
 }

@@ -4,34 +4,13 @@ import {
   PoolVerificationUpdated as PoolVerificationUpdatedEvent,
   StrategyVerificationUpdated as StrategyVerificationUpdatedEvent,
 } from "../generated/ProtocolRegistry/ProtocolRegistry";
-import {
-  OracleVerificationUpdated,
-  OwnershipTransferred,
-  PoolVerificationUpdated,
-  StrategyVerificationUpdated,
-  Pool,
-  Oracle,
-  Strategy,
-} from "../generated/schema";
+import { Pool, Oracle, Strategy } from "../generated/schema";
 import { DefaultPoolStrategy } from "../generated/templates/DefaultPoolStrategy/DefaultPoolStrategy";
 import { DefaultPoolStrategy as DefaultPoolStrategyTemplate } from "../generated/templates";
-import { BigInt } from "@graphprotocol/graph-ts";
 
 export function handleOracleVerificationUpdated(
   event: OracleVerificationUpdatedEvent
 ): void {
-  let entity = new OracleVerificationUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.oracle = event.params.oracle;
-  entity.isVerified = event.params.isVerified;
-
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-
-  entity.save();
-
   // Update the Oracle entity
   let oracle = Oracle.load(event.params.oracle);
   if (oracle) {
@@ -44,34 +23,12 @@ export function handleOracleVerificationUpdated(
 export function handleOwnershipTransferred(
   event: OwnershipTransferredEvent
 ): void {
-  let entity = new OwnershipTransferred(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.previousOwner = event.params.previousOwner;
-  entity.newOwner = event.params.newOwner;
-
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-
-  entity.save();
+  return;
 }
 
 export function handlePoolVerificationUpdated(
   event: PoolVerificationUpdatedEvent
 ): void {
-  let entity = new PoolVerificationUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.pool = event.params.pool;
-  entity.isVerified = event.params.isVerified;
-
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-
-  entity.save();
-
   // Update the Pool entity
   let pool = Pool.load(event.params.pool);
   if (pool) {
@@ -84,18 +41,6 @@ export function handlePoolVerificationUpdated(
 export function handleStrategyVerificationUpdated(
   event: StrategyVerificationUpdatedEvent
 ): void {
-  let entity = new StrategyVerificationUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.strategy = event.params.strategy;
-  entity.isVerified = event.params.isVerified;
-
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-
-  entity.save();
-
   // Create or update the Strategy entity
   let strategy = Strategy.load(event.params.strategy);
   if (strategy == null) {

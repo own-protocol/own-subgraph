@@ -1,6 +1,5 @@
 import { BigInt, Address } from "@graphprotocol/graph-ts";
 import {
-  AssetOracle,
   AssetPriceUpdated,
   OHLCDataUpdated,
   SplitDetected,
