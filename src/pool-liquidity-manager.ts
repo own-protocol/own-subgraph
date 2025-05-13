@@ -88,7 +88,11 @@ function createLPRequest(
 }
 
 // Helper to update LP health
-function updateLPHealth(lpAddress: Address, poolAddress: Address): void {
+function updateLPHealth(
+  lpAddress: Address,
+  poolAddress: Address,
+  timestamp: BigInt
+): void {
   let positionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
   let lpPosition = LPPosition.load(positionId);
 
@@ -129,12 +133,12 @@ function updateLPHealth(lpAddress: Address, poolAddress: Address): void {
     }
   }
 
-  lpPosition.updatedAt = BigInt.fromI32(Date.now() / 1000);
+  lpPosition.updatedAt = timestamp;
   lpPosition.save();
 }
 
 // Helper to update pool LP stats
-function updatePoolLPStats(poolAddress: Address): void {
+function updatePoolLPStats(poolAddress: Address, timestamp: BigInt): void {
   let pool = Pool.load(poolAddress);
   if (pool == null) return;
 
@@ -181,7 +185,7 @@ function updatePoolLPStats(poolAddress: Address): void {
     cycle.save();
   }
 
-  pool.updatedAt = BigInt.fromI32(Date.now() / 1000);
+  pool.updatedAt = timestamp;
   pool.save();
 }
 
@@ -203,10 +207,10 @@ export function handleCollateralAdded(event: CollateralAdded): void {
   lpPosition.save();
 
   // Update LP health
-  updateLPHealth(lpAddress, poolAddress);
+  updateLPHealth(lpAddress, poolAddress, event.block.timestamp);
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Create protocol event
   let id =
@@ -238,10 +242,10 @@ export function handleCollateralReduced(event: CollateralReduced): void {
   lpPosition.save();
 
   // Update LP health
-  updateLPHealth(lpAddress, poolAddress);
+  updateLPHealth(lpAddress, poolAddress, event.block.timestamp);
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Create protocol event
   let id =
@@ -273,7 +277,7 @@ export function handleInterestClaimed(event: InterestClaimed): void {
   lpPosition.save();
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Create protocol event
   let id =
@@ -309,10 +313,10 @@ export function handleLPAdded(event: LPAdded): void {
   lpPosition.save();
 
   // Update LP health
-  updateLPHealth(lpAddress, poolAddress);
+  updateLPHealth(lpAddress, poolAddress, event.block.timestamp);
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Create protocol event
   let id =
@@ -349,7 +353,7 @@ export function handleLPRemoved(event: LPRemoved): void {
   }
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Create protocol event
   let id =
@@ -383,10 +387,10 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
   lpPosition.save();
 
   // Update LP health
-  updateLPHealth(lpAddress, poolAddress);
+  updateLPHealth(lpAddress, poolAddress, event.block.timestamp);
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Find and update request status
   let pool = Pool.load(poolAddress);
@@ -432,10 +436,10 @@ export function handleLiquidityReduced(event: LiquidityReduced): void {
   lpPosition.save();
 
   // Update LP health
-  updateLPHealth(lpAddress, poolAddress);
+  updateLPHealth(lpAddress, poolAddress, event.block.timestamp);
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Find and update request status
   let pool = Pool.load(poolAddress);
@@ -486,7 +490,7 @@ export function handleLiquidityAdditionRequested(
   );
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Create protocol event
   let id =
@@ -521,7 +525,7 @@ export function handleLiquidityReductionRequested(
   );
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Create protocol event
   let id =
@@ -561,7 +565,7 @@ export function handleLPLiquidationRequested(
   );
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Create protocol event
   let id =
@@ -597,10 +601,10 @@ export function handleLPLiquidationExecuted(
   lpPosition.save();
 
   // Update LP health
-  updateLPHealth(lpAddress, poolAddress);
+  updateLPHealth(lpAddress, poolAddress, event.block.timestamp);
 
   // Update pool stats
-  updatePoolLPStats(poolAddress);
+  updatePoolLPStats(poolAddress, event.block.timestamp);
 
   // Find and update request status
   let pool = Pool.load(poolAddress);

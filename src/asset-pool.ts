@@ -102,7 +102,7 @@ function createUserRequest(
 }
 
 // Helper to update pool data
-function updatePoolData(poolAddress: Address): void {
+function updatePoolData(poolAddress: Address, timestamp: BigInt): void {
   let pool = Pool.load(poolAddress);
   if (pool == null) return;
 
@@ -154,14 +154,15 @@ function updatePoolData(poolAddress: Address): void {
     }
   }
 
-  pool.updatedAt = BigInt.fromI32(Date.now() / 1000);
+  pool.updatedAt = timestamp;
   pool.save();
 }
 
 // Helper to update user position health
 function updateUserPositionHealth(
   userAddress: Address,
-  poolAddress: Address
+  poolAddress: Address,
+  timestamp: BigInt
 ): void {
   let positionId = userAddress.toHexString() + "-" + poolAddress.toHexString();
   let userPosition = UserPosition.load(positionId);
@@ -192,7 +193,7 @@ function updateUserPositionHealth(
     }
   }
 
-  userPosition.updatedAt = BigInt.fromI32(Date.now() / 1000);
+  userPosition.updatedAt = timestamp;
   userPosition.save();
 }
 
@@ -212,10 +213,10 @@ export function handleCollateralDeposited(event: CollateralDeposited): void {
   userPosition.save();
 
   // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress);
+  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(
@@ -243,10 +244,10 @@ export function handleCollateralWithdrawn(event: CollateralWithdrawn): void {
   userPosition.save();
 
   // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress);
+  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(
@@ -302,7 +303,7 @@ export function handleDepositRequested(event: DepositRequested): void {
   userPosition.save();
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(
@@ -331,7 +332,7 @@ export function handleAssetClaimed(event: AssetClaimed): void {
   userPosition.save();
 
   // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress);
+  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
 
   // Update request status
   let requestId =
@@ -348,7 +349,7 @@ export function handleAssetClaimed(event: AssetClaimed): void {
   }
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(event, poolAddress, "ASSET_CLAIMED", userAddress, amount);
@@ -379,7 +380,7 @@ export function handleRedemptionRequested(event: RedemptionRequested): void {
   );
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(
@@ -439,7 +440,7 @@ export function handleReserveWithdrawn(event: ReserveWithdrawn): void {
   userPosition.save();
 
   // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress);
+  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
 
   // Update request status
   let requestId =
@@ -456,7 +457,7 @@ export function handleReserveWithdrawn(event: ReserveWithdrawn): void {
   }
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(
@@ -488,7 +489,7 @@ export function handleLiquidationRequested(event: LiquidationRequested): void {
   );
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(
@@ -540,7 +541,7 @@ export function handleLiquidationClaimed(event: LiquidationClaimed): void {
   userPosition.save();
 
   // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress);
+  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
 
   // Find and update liquidation request
   // This is simplified - in reality you'd need to find the right request
@@ -563,7 +564,7 @@ export function handleLiquidationClaimed(event: LiquidationClaimed): void {
   }
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(
@@ -601,7 +602,7 @@ export function handleLiquidationCancelled(event: LiquidationCancelled): void {
   }
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 
   // Create protocol event
   createProtocolEvent(
@@ -631,5 +632,5 @@ export function handleFeeDeducted(event: FeeDeducted): void {
   feeEvent.save();
 
   // Update pool data
-  updatePoolData(poolAddress);
+  updatePoolData(poolAddress, event.block.timestamp);
 }
