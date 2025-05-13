@@ -92,9 +92,9 @@ export function handleRebalanced(event: Rebalanced): void {
   // Update pool data
   let pool = Pool.load(poolAddress);
   if (pool != null) {
-    pool.rebalancedLPs = (pool.rebalancedLPs || BigInt.fromI32(0)).plus(
-      BigInt.fromI32(1)
-    );
+    if (pool.rebalancedLPs != null) {
+      pool.rebalancedLPs = pool.rebalancedLPs.plus(BigInt.fromI32(1));
+    }
     pool.updatedAt = event.block.timestamp;
     pool.save();
 
