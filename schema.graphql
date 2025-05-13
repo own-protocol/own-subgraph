@@ -28,11 +28,11 @@ type Pool @entity(immutable: false) {
   reserveYieldAccrued: BigInt
 
   # Liquidity Manager Data
-  totalLPLiquidityCommited: BigInt
-  totalLPCollateral: BigInt
+  totalLPLiquidityCommited: BigInt!
+  totalLPCollateral: BigInt!
   lpCount: BigInt!
-  cycleTotalAddLiquidityAmount: BigInt
-  cycleTotalReduceLiquidityAmount: BigInt
+  cycleTotalAddLiquidityAmount: BigInt!
+  cycleTotalReduceLiquidityAmount: BigInt!
 
   # Cycle Manager Data
   cycleState: String # enum: POOL_ACTIVE, POOL_REBALANCING_OFFCHAIN, POOL_REBALANCING_ONCHAIN, POOL_HALTED
