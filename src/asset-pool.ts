@@ -154,7 +154,7 @@ function updatePoolData(poolAddress: Address): void {
     }
   }
 
-  pool.updatedAt = BigInt.now();
+  pool.updatedAt = BigInt.fromI32(Date.now() / 1000);
   pool.save();
 }
 
@@ -192,7 +192,7 @@ function updateUserPositionHealth(
     }
   }
 
-  userPosition.updatedAt = BigInt.now();
+  userPosition.updatedAt = BigInt.fromI32(Date.now() / 1000);
   userPosition.save();
 }
 
@@ -585,7 +585,7 @@ export function handleLiquidationCancelled(event: LiquidationCancelled): void {
   let pool = Pool.load(poolAddress);
   if (pool == null) return;
 
-  let cycleIndex = pool.cycleIndex; // Cancellation happens in the same cycle
+  let cycleIndex = pool.cycleIndex.minus(BigInt.fromI32(1));
   let requestId =
     userAddress.toHexString() +
     "-" +

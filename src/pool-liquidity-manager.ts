@@ -25,6 +25,7 @@ import {
   Cycle,
 } from "../generated/schema";
 import { PoolLiquidityManager } from "../generated/templates/PoolLiquidityManager/PoolLiquidityManager";
+import { DefaultPoolStrategy } from "../generated/templates/DefaultPoolStrategy/DefaultPoolStrategy";
 
 // Helper to create or update LP position
 function getOrCreateLPPosition(
@@ -112,29 +113,23 @@ function updateLPHealth(lpAddress: Address, poolAddress: Address): void {
     lpPosition.assetShare = assetShareCall.value;
   }
 
-  // We would call the strategy contract to get the health, but for simplicity
-  // let's approximate it based on the collateral ratio
-  if (lpPosition.assetHoldingValue.isZero()) {
-    lpPosition.liquidityHealth = 3; // Healthy if no asset value
-  } else {
-    // Calculate collateral ratio and set health
-    // This is a simplified approximation - in real implementation, call the strategy contract
-    let collateralRatio = lpPosition.collateralAmount
-      .times(BigInt.fromI32(10000))
-      .div(lpPosition.assetHoldingValue);
+  // Get pool strategy address
+  let poolStrategyCall = liquManager.try_poolStrategy();
+  if (!poolStrategyCall.reverted) {
+    // Call the strategy contract to get the actual health
+    let strategyAddress = poolStrategyCall.value;
+    let strategy = DefaultPoolStrategy.bind(strategyAddress);
 
-    if (collateralRatio.ge(BigInt.fromI32(3000))) {
-      // 30%
-      lpPosition.liquidityHealth = 3; // Healthy
-    } else if (collateralRatio.ge(BigInt.fromI32(2000))) {
-      // 20%
-      lpPosition.liquidityHealth = 2; // Warning
-    } else {
-      lpPosition.liquidityHealth = 1; // Liquidatable
+    // Call getLPLiquidityHealth on the strategy contract
+    let healthCall = strategy.try_getLPLiquidityHealth(poolAddress, lpAddress);
+
+    if (!healthCall.reverted) {
+      // Set the actual health value from the contract
+      lpPosition.liquidityHealth = healthCall.value;
     }
   }
 
-  lpPosition.updatedAt = BigInt.now();
+  lpPosition.updatedAt = BigInt.fromI32(Date.now() / 1000);
   lpPosition.save();
 }
 
@@ -178,13 +173,15 @@ function updatePoolLPStats(poolAddress: Address): void {
   let cycleId = poolAddress.toHexString() + "-" + pool.cycleIndex.toString();
   let cycle = Cycle.load(cycleId);
   if (cycle != null) {
-    cycle.totalAddLiquidity = pool.cycleTotalAddLiquidityAmount;
-    cycle.totalReduceLiquidity = pool.cycleTotalReduceLiquidityAmount;
+    cycle.totalAddLiquidity =
+      pool.cycleTotalAddLiquidityAmount || BigInt.fromI32(0);
+    cycle.totalReduceLiquidity =
+      pool.cycleTotalReduceLiquidityAmount || BigInt.fromI32(0);
     cycle.lpCount = pool.lpCount;
     cycle.save();
   }
 
-  pool.updatedAt = BigInt.now();
+  pool.updatedAt = BigInt.fromI32(Date.now() / 1000);
   pool.save();
 }
 

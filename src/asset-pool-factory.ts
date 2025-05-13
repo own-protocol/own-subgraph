@@ -4,7 +4,7 @@ import {
   OwnershipTransferred as OwnershipTransferredEvent,
   RegistryUpdated as RegistryUpdatedEvent,
 } from "../generated/AssetPoolFactory/AssetPoolFactory";
-import { Pool, Oracle, Strategy } from "../generated/schema";
+import { Pool, Oracle, Strategy, Cycle } from "../generated/schema";
 import { AssetPool } from "../generated/templates/AssetPool/AssetPool";
 import { XToken } from "../generated/templates/XToken/XToken";
 import { ERC20 } from "../generated/templates/ERC20/ERC20";
@@ -89,7 +89,7 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.assetToken = assetTokenAddress;
   pool.poolCycleManager = poolCycleManagerAddress;
   pool.poolLiquidityManager = poolLiquidityManagerAddress;
-  pool.strategy = poolStrategyAddress; // This creates the relationship with Strategy
+  pool.poolStrategy = poolStrategyAddress; // This creates the relationship with Strategy
   pool.createdAt = event.block.timestamp;
   pool.updatedAt = event.block.timestamp;
   pool.isVerified = false;

@@ -10,7 +10,7 @@ type Pool @entity(immutable: false) {
   reserveTokenDecimals: Int
   oracle: Bytes! # oracle address
   assetPrice: BigInt
-  poolStrategy: Bytes! # strategy address
+  poolStrategy: Strategy! # strategy
   poolCycleManager: Bytes!
   poolLiquidityManager: Bytes!
   createdAt: BigInt!
@@ -30,13 +30,13 @@ type Pool @entity(immutable: false) {
   # Liquidity Manager Data
   totalLPLiquidityCommited: BigInt
   totalLPCollateral: BigInt
-  lpCount: BigInt
+  lpCount: BigInt!
   cycleTotalAddLiquidityAmount: BigInt
   cycleTotalReduceLiquidityAmount: BigInt
 
   # Cycle Manager Data
   cycleState: String # enum: POOL_ACTIVE, POOL_REBALANCING_OFFCHAIN, POOL_REBALANCING_ONCHAIN, POOL_HALTED
-  cycleIndex: BigInt
+  cycleIndex: BigInt!
   lastCycleActionDateTime: BigInt
   cyclePriceHigh: BigInt
   cyclePriceLow: BigInt
@@ -47,7 +47,6 @@ type Pool @entity(immutable: false) {
   users: [UserPosition!]! @derivedFrom(field: "pool")
   lpPositions: [LPPosition!]! @derivedFrom(field: "pool")
   cycles: [Cycle!]! @derivedFrom(field: "pool")
-  strategy: Strategy @derivedFrom(field: "pools")
 }
 
 type Oracle @entity(immutable: false) {
@@ -97,7 +96,7 @@ type Strategy @entity(immutable: false) {
   updatedAt: BigInt!
 
   # Relation
-  pools: [Pool!]! @derivedFrom(field: "strategy")
+  pools: [Pool!]! @derivedFrom(field: "poolStrategy")
 }
 
 # Entity to track user positions

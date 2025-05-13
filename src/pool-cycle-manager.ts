@@ -92,7 +92,9 @@ export function handleRebalanced(event: Rebalanced): void {
   // Update pool data
   let pool = Pool.load(poolAddress);
   if (pool != null) {
-    pool.rebalancedLPs = pool.rebalancedLPs.plus(BigInt.fromI32(1));
+    pool.rebalancedLPs = (pool.rebalancedLPs || BigInt.fromI32(0)).plus(
+      BigInt.fromI32(1)
+    );
     pool.updatedAt = event.block.timestamp;
     pool.save();
 
@@ -140,7 +142,7 @@ export function handleInterestAccrued(event: InterestAccrued): void {
   // Update pool data
   let pool = Pool.load(poolAddress);
   if (pool != null) {
-    pool.cycleInterestAmount = pool.cycleInterestAmount.plus(interestAccrued);
+    pool.cycleInterestAmount = interestAccrued;
     pool.updatedAt = event.block.timestamp;
     pool.save();
 
