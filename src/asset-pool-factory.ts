@@ -4,7 +4,7 @@ import {
   OwnershipTransferred as OwnershipTransferredEvent,
   RegistryUpdated as RegistryUpdatedEvent,
 } from "../generated/AssetPoolFactory/AssetPoolFactory";
-import { Pool, Oracle } from "../generated/schema";
+import { Pool, Oracle, Strategy } from "../generated/schema";
 import { AssetPool } from "../generated/templates/AssetPool/AssetPool";
 import { XToken } from "../generated/templates/XToken/XToken";
 import { ERC20 } from "../generated/templates/ERC20/ERC20";
@@ -13,18 +13,27 @@ import {
   XToken as XTokenTemplate,
   AssetOracle as AssetOracleTemplate,
   ERC20 as ERC20Template,
+  PoolCycleManager as PoolCycleManagerTemplate,
+  PoolLiquidityManager as PoolLiquidityManagerTemplate,
 } from "../generated/templates";
 import { Address, BigInt } from "@graphprotocol/graph-ts";
 
 export function handleAssetOracleCreated(event: AssetOracleCreatedEvent): void {
-  // Create a Oracle entity
+  // Create an Oracle entity
   let oracle = new Oracle(event.params.oracle);
   oracle.assetSymbol = event.params.assetSymbol;
-  oracle.assetPrice = BigInt.fromI32(0); // Will be updated later
-  oracle.lastUpdated = BigInt.fromI32(0); // Will be updated later
-  oracle.isVerified = false; // Will be set to true when  in registry
+  oracle.assetPrice = BigInt.fromI32(0);
+  oracle.lastUpdated = BigInt.fromI32(0);
+  oracle.isVerified = false;
   oracle.createdAt = event.block.timestamp;
   oracle.updatedAt = event.block.timestamp;
+  oracle.splitDetected = false;
+  oracle.preSplitPrice = BigInt.fromI32(0);
+  oracle.ohlcOpen = BigInt.fromI32(0);
+  oracle.ohlcHigh = BigInt.fromI32(0);
+  oracle.ohlcLow = BigInt.fromI32(0);
+  oracle.ohlcClose = BigInt.fromI32(0);
+  oracle.ohlcTimestamp = BigInt.fromI32(0);
   oracle.save();
 
   // Create a template for tracking the AssetOracle
@@ -40,7 +49,6 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   let assetPoolContract = AssetPool.bind(event.params.pool);
 
   // Get asset token address and other contract references
-  // These might be unsuccessful calls if the contracts are not initialized properly
   let assetTokenAddress = Address.zero();
   let poolCycleManagerAddress = Address.zero();
   let poolLiquidityManagerAddress = Address.zero();
@@ -59,10 +67,14 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
 
   if (!poolCycleManagerCall.reverted) {
     poolCycleManagerAddress = poolCycleManagerCall.value;
+    // Create template for PoolCycleManager
+    PoolCycleManagerTemplate.create(poolCycleManagerAddress);
   }
 
   if (!poolLiquidityManagerCall.reverted) {
     poolLiquidityManagerAddress = poolLiquidityManagerCall.value;
+    // Create template for PoolLiquidityManager
+    PoolLiquidityManagerTemplate.create(poolLiquidityManagerAddress);
   }
 
   if (!poolStrategyCall.reverted) {
@@ -77,10 +89,10 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.assetToken = assetTokenAddress;
   pool.poolCycleManager = poolCycleManagerAddress;
   pool.poolLiquidityManager = poolLiquidityManagerAddress;
-  pool.poolStrategy = poolStrategyAddress;
+  pool.poolStrategy = poolStrategyAddress; // This creates the relationship with Strategy
   pool.createdAt = event.block.timestamp;
   pool.updatedAt = event.block.timestamp;
-  pool.isVerified = false; // Will be set to true when verified in registry
+  pool.isVerified = false;
 
   // Try to get token details
   let reserveToken = ERC20.bind(event.params.depositToken);
@@ -116,15 +128,26 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   }
 
   // Initialize other fields with zero values
-  pool.totalSupply = BigInt.fromI32(0);
+  pool.assetSupply = BigInt.fromI32(0);
   pool.reserveBackingAsset = BigInt.fromI32(0);
+  pool.aggregatePoolReserves = BigInt.fromI32(0);
   pool.totalUserDeposits = BigInt.fromI32(0);
   pool.totalUserCollateral = BigInt.fromI32(0);
+  pool.cycleTotalDeposits = BigInt.fromI32(0);
+  pool.cycleTotalRedemptions = BigInt.fromI32(0);
+  pool.reserveYieldAccrued = BigInt.fromI32(0);
   pool.totalLPLiquidityCommited = BigInt.fromI32(0);
   pool.totalLPCollateral = BigInt.fromI32(0);
+  pool.lpCount = BigInt.fromI32(0);
+  pool.cycleTotalAddLiquidityAmount = BigInt.fromI32(0);
+  pool.cycleTotalReduceLiquidityAmount = BigInt.fromI32(0);
   pool.cycleState = "POOL_ACTIVE";
   pool.cycleIndex = BigInt.fromI32(1);
-  pool.lpCount = BigInt.fromI32(0);
+  pool.lastCycleActionDateTime = event.block.timestamp;
+  pool.cyclePriceHigh = BigInt.fromI32(0);
+  pool.cyclePriceLow = BigInt.fromI32(0);
+  pool.cycleInterestAmount = BigInt.fromI32(0);
+  pool.rebalancedLPs = BigInt.fromI32(0);
   pool.assetPrice = BigInt.fromI32(0);
 
   pool.save();
@@ -132,10 +155,24 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   // Update the oracle entity to establish bidirectional relationship
   let oracle = Oracle.load(event.params.oracle);
   if (oracle) {
-    // Set the pool reference in the oracle
     oracle.pool = event.params.pool;
     oracle.save();
   }
+
+  // Create initial Cycle entity
+  let cycleId = event.params.pool.toHexString() + "-1";
+  let cycle = new Cycle(cycleId);
+  cycle.pool = event.params.pool;
+  cycle.cycleIndex = BigInt.fromI32(1);
+  cycle.state = "POOL_ACTIVE";
+  cycle.startTime = event.block.timestamp;
+  cycle.totalDeposits = BigInt.fromI32(0);
+  cycle.totalRedemptions = BigInt.fromI32(0);
+  cycle.totalAddLiquidity = BigInt.fromI32(0);
+  cycle.totalReduceLiquidity = BigInt.fromI32(0);
+  cycle.lpCount = BigInt.fromI32(0);
+  cycle.rebalancedLPs = BigInt.fromI32(0);
+  cycle.save();
 }
 
 export function handleOwnershipTransferred(

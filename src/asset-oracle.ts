@@ -33,11 +33,29 @@ export function handleAssetPriceUpdated(event: AssetPriceUpdated): void {
 }
 
 export function handleOHLCDataUpdated(event: OHLCDataUpdated): void {
-  let verifiedOracle = Oracle.load(event.address);
+  let oracleAddress = event.address;
+  let oracle = Oracle.load(oracleAddress);
 
-  if (verifiedOracle) {
-    verifiedOracle.updatedAt = event.block.timestamp;
-    verifiedOracle.save();
+  if (oracle) {
+    // Update OHLC data
+    oracle.ohlcOpen = event.params.open;
+    oracle.ohlcHigh = event.params.high;
+    oracle.ohlcLow = event.params.low;
+    oracle.ohlcClose = event.params.close;
+    oracle.ohlcTimestamp = event.params.timestamp;
+    oracle.updatedAt = event.block.timestamp;
+    oracle.save();
+
+    // Update pool with the latest price
+    let poolAddress = oracle.pool;
+    if (poolAddress !== null) {
+      let pool = Pool.load(poolAddress);
+      if (pool) {
+        pool.assetPrice = event.params.close;
+        pool.updatedAt = event.block.timestamp;
+        pool.save();
+      }
+    }
   }
 }
 
@@ -46,8 +64,11 @@ export function handleSplitDetected(event: SplitDetected): void {
   let oracle = Oracle.load(oracleAddress);
 
   if (oracle) {
-    // Update oracle data
+    // Update split detection data
+    oracle.splitDetected = true;
+    oracle.preSplitPrice = event.params.prevPrice;
     oracle.assetPrice = event.params.newPrice;
+    oracle.lastUpdated = event.params.timestamp;
     oracle.updatedAt = event.block.timestamp;
     oracle.save();
 
