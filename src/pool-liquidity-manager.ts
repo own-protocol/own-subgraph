@@ -177,10 +177,18 @@ function updatePoolLPStats(poolAddress: Address, timestamp: BigInt): void {
   let cycleId = poolAddress.toHexString() + "-" + pool.cycleIndex.toString();
   let cycle = Cycle.load(cycleId);
   if (cycle != null) {
-    cycle.totalAddLiquidity =
-      pool.cycleTotalAddLiquidityAmount || BigInt.fromI32(0);
-    cycle.totalReduceLiquidity =
-      pool.cycleTotalReduceLiquidityAmount || BigInt.fromI32(0);
+    if (pool.cycleTotalAddLiquidityAmount != null) {
+      cycle.totalAddLiquidity = pool.cycleTotalAddLiquidityAmount;
+    } else {
+      cycle.totalAddLiquidity = BigInt.fromI32(0);
+    }
+
+    if (pool.cycleTotalReduceLiquidityAmount != null) {
+      cycle.totalReduceLiquidity = pool.cycleTotalReduceLiquidityAmount;
+    } else {
+      cycle.totalReduceLiquidity = BigInt.fromI32(0);
+    }
+
     cycle.lpCount = pool.lpCount;
     cycle.save();
   }

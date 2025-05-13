@@ -41,7 +41,7 @@ type Pool @entity(immutable: false) {
   cyclePriceHigh: BigInt
   cyclePriceLow: BigInt
   cycleInterestAmount: BigInt
-  rebalancedLPs: BigInt
+  rebalancedLPs: BigInt!
 
   # Relations
   users: [UserPosition!]! @derivedFrom(field: "pool")
