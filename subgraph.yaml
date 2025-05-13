@@ -18,6 +18,7 @@ dataSources:
       entities:
         - Pool
         - Oracle
+        - Cycle
       abis:
         - name: AssetPoolFactory
           file: ./abis/AssetPoolFactory.json
@@ -83,6 +84,10 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Pool
+        - UserPosition
+        - UserRequest
+        - ProtocolEvent
+        - FeeEvent
       abis:
         - name: AssetPool
           file: ./abis/AssetPool.json
@@ -107,7 +112,91 @@ templates:
           handler: handleLiquidationClaimed
         - event: LiquidationCancelled(indexed address,indexed address,uint256)
           handler: handleLiquidationCancelled
+        - event: FeeDeducted(indexed address,uint256)
+          handler: handleFeeDeducted
       file: ./src/asset-pool.ts
+
+  - kind: ethereum
+    name: PoolCycleManager
+    network: base-sepolia
+    source:
+      abi: PoolCycleManager
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Cycle
+        - LPPosition
+        - LPRebalance
+      abis:
+        - name: PoolCycleManager
+          file: ./abis/PoolCycleManager.json
+      eventHandlers:
+        - event: CycleStarted(indexed uint256,uint256)
+          handler: handleCycleStarted
+        - event: RebalanceInitiated(indexed uint256,uint256,uint256)
+          handler: handleRebalanceInitiated
+        - event: Rebalanced(indexed address,uint256,uint256,bool,indexed uint256)
+          handler: handleRebalanced
+        - event: InterestAccrued(uint256,uint256,uint256)
+          handler: handleInterestAccrued
+        - event: isPriceDeviationValidUpdated(bool)
+          handler: handleIsPriceDeviationValidUpdated
+      file: ./src/pool-cycle-manager.ts
+
+  - kind: ethereum
+    name: PoolLiquidityManager
+    network: base-sepolia
+    source:
+      abi: PoolLiquidityManager
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - LPPosition
+        - LPRequest
+        - ProtocolEvent
+        - FeeEvent
+        - Cycle
+      abis:
+        - name: PoolLiquidityManager
+          file: ./abis/PoolLiquidityManager.json
+      eventHandlers:
+        - event: CollateralAdded(indexed address,uint256)
+          handler: handleCollateralAdded
+        - event: CollateralReduced(indexed address,uint256)
+          handler: handleCollateralReduced
+        - event: InterestClaimed(indexed address,uint256)
+          handler: handleInterestClaimed
+        - event: LPAdded(indexed address,uint256,uint256)
+          handler: handleLPAdded
+        - event: LPLiquidationExecuted(indexed address,indexed address,uint256,uint256)
+          handler: handleLPLiquidationExecuted
+        - event: LPLiquidationRequested(indexed address,uint256,uint256)
+          handler: handleLPLiquidationRequested
+        - event: LPRemoved(indexed address)
+          handler: handleLPRemoved
+        - event: LiquidationCancelled(indexed address)
+          handler: handleLiquidationCancelled
+        - event: LiquidityAdded(indexed address,uint256)
+          handler: handleLiquidityAdded
+        - event: LiquidityAdditionRequested(indexed address,uint256,uint256)
+          handler: handleLiquidityAdditionRequested
+        - event: LiquidityReduced(indexed address,uint256)
+          handler: handleLiquidityReduced
+        - event: LiquidityReductionRequested(indexed address,uint256,uint256)
+          handler: handleLiquidityReductionRequested
+        - event: InterestDistributedToLP(indexed address,indexed uint256,indexed uint256)
+          handler: handleInterestDistributedToLP
+        - event: RebalanceAmountTransferred(indexed address,indexed uint256,indexed uint256)
+          handler: handleRebalanceAmountTransferred
+        - event: FeeDeducted(indexed address,uint256)
+          handler: handleFeeDeducted
+      file: ./src/pool-liquidity-manager.ts
 
   - kind: ethereum
     name: XToken
@@ -123,8 +212,7 @@ templates:
       abis:
         - name: XToken
           file: ./abis/XToken.json
-      # No event handlers needed, will be updated through AssetPool handlers
-      file: ./src/asset-pool.ts
+      file: ./src/xtoken.ts
 
   - kind: ethereum
     name: AssetOracle
@@ -164,8 +252,7 @@ templates:
       abis:
         - name: ERC20
           file: ./abis/ERC20.json
-      # No event handlers needed, will be updated through AssetPool handlers
-      file: ./src/asset-pool.ts
+      file: ./src/erc20.ts
 
   - kind: ethereum
     name: DefaultPoolStrategy
@@ -177,9 +264,21 @@ templates:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - VerifiedStrategy
+        - Strategy
       abis:
         - name: DefaultPoolStrategy
           file: ./abis/DefaultPoolStrategy.json
-      # No event handlers needed, will be updated through registry handlers
-      file: ./src/protocol-registry.ts
+      eventHandlers:
+        - event: InterestRateParamsUpdated(uint256,uint256,uint256,uint256,uint256)
+          handler: handleInterestRateParamsUpdated
+        - event: UserCollateralParamsUpdated(uint256,uint256)
+          handler: handleUserCollateralParamsUpdated
+        - event: LPLiquidityParamsUpdated(uint256,uint256,uint256,uint256)
+          handler: handleLPLiquidityParamsUpdated
+        - event: CycleParamsUpdated(uint256,uint256,uint256)
+          handler: handleCycleParamsUpdated
+        - event: FeeParamsUpdated(uint256,address)
+          handler: handleFeeParamsUpdated
+        - event: IsYieldBearingUpdated(bool)
+          handler: handleIsYieldBearingUpdated
+      file: ./src/default-pool-strategy.ts
