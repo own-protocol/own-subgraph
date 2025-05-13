@@ -24,7 +24,7 @@ export function handleAssetPriceUpdated(event: AssetPriceUpdated): void {
     if (poolAddress !== null) {
       let pool = Pool.load(poolAddress);
       if (pool) {
-        pool.currentAssetPrice = event.params.price;
+        pool.assetPrice = event.params.price;
         pool.updatedAt = event.block.timestamp;
         pool.save();
       }
@@ -56,7 +56,7 @@ export function handleSplitDetected(event: SplitDetected): void {
     if (poolAddress !== null) {
       let pool = Pool.load(poolAddress);
       if (pool) {
-        pool.currentAssetPrice = event.params.newPrice;
+        pool.assetPrice = event.params.newPrice;
         pool.updatedAt = event.block.timestamp;
         pool.save();
       }

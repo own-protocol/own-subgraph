@@ -72,7 +72,7 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   // Create a new Pool entity
   let pool = new Pool(event.params.pool);
   pool.assetSymbol = event.params.assetSymbol;
-  pool.depositToken = event.params.depositToken;
+  pool.reserveToken = event.params.depositToken;
   pool.oracle = event.params.oracle;
   pool.assetToken = assetTokenAddress;
   pool.poolCycleManager = poolCycleManagerAddress;
@@ -84,13 +84,8 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
 
   // Try to get token details
   let reserveToken = ERC20.bind(event.params.depositToken);
-  let reserveTokenNameCall = reserveToken.try_name();
   let reserveTokenSymbolCall = reserveToken.try_symbol();
   let reserveTokenDecimalsCall = reserveToken.try_decimals();
-
-  if (!reserveTokenNameCall.reverted) {
-    pool.reserveTokenName = reserveTokenNameCall.value;
-  }
 
   if (!reserveTokenSymbolCall.reverted) {
     pool.reserveTokenSymbol = reserveTokenSymbolCall.value;
@@ -130,7 +125,7 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.cycleState = "POOL_ACTIVE";
   pool.cycleIndex = BigInt.fromI32(1);
   pool.lpCount = BigInt.fromI32(0);
-  pool.currentAssetPrice = BigInt.fromI32(0);
+  pool.assetPrice = BigInt.fromI32(0);
 
   pool.save();
 

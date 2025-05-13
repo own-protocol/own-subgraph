@@ -1,16 +1,15 @@
 type Pool @entity(immutable: false) {
   id: Bytes! # pool address
   assetSymbol: String!
-  depositToken: Bytes! # reserve token address
-  reserveTokenName: String
-  reserveTokenSymbol: String
-  reserveTokenDecimals: Int
   assetToken: Bytes! # xToken address
   assetTokenName: String
   assetTokenSymbol: String
   assetTokenDecimals: Int
+  reserveToken: Bytes! # reserve token address
+  reserveTokenSymbol: String
+  reserveTokenDecimals: Int
   oracle: Bytes! # oracle address
-  currentAssetPrice: BigInt
+  assetPrice: BigInt
   poolStrategy: Bytes! # strategy address
   poolCycleManager: Bytes!
   poolLiquidityManager: Bytes!
