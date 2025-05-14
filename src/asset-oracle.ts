@@ -17,18 +17,6 @@ export function handleAssetPriceUpdated(event: AssetPriceUpdated): void {
     oracle.updatedAt = event.block.timestamp;
 
     oracle.save();
-
-    // Find and update the pool that uses this oracle
-    // Since each pool has a dedicated oracle, we can look up by oracle address
-    let poolAddress = oracle.pool;
-    if (poolAddress !== null) {
-      let pool = Pool.load(poolAddress);
-      if (pool) {
-        pool.assetPrice = event.params.price;
-        pool.updatedAt = event.block.timestamp;
-        pool.save();
-      }
-    }
   }
 }
 
@@ -45,17 +33,6 @@ export function handleOHLCDataUpdated(event: OHLCDataUpdated): void {
     oracle.ohlcTimestamp = event.params.timestamp;
     oracle.updatedAt = event.block.timestamp;
     oracle.save();
-
-    // Update pool with the latest price
-    let poolAddress = oracle.pool;
-    if (poolAddress !== null) {
-      let pool = Pool.load(poolAddress);
-      if (pool) {
-        pool.assetPrice = event.params.close;
-        pool.updatedAt = event.block.timestamp;
-        pool.save();
-      }
-    }
   }
 }
 
@@ -71,16 +48,5 @@ export function handleSplitDetected(event: SplitDetected): void {
     oracle.lastUpdated = event.params.timestamp;
     oracle.updatedAt = event.block.timestamp;
     oracle.save();
-
-    // Find and update the pool that uses this oracle
-    let poolAddress = oracle.pool;
-    if (poolAddress !== null) {
-      let pool = Pool.load(poolAddress);
-      if (pool) {
-        pool.assetPrice = event.params.newPrice;
-        pool.updatedAt = event.block.timestamp;
-        pool.save();
-      }
-    }
   }
 }

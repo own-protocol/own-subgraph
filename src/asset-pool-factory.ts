@@ -171,16 +171,8 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.cyclePriceLow = BigInt.fromI32(0);
   pool.cycleInterestAmount = BigInt.fromI32(0);
   pool.rebalancedLPs = BigInt.fromI32(0);
-  pool.assetPrice = BigInt.fromI32(0);
 
   pool.save();
-
-  // Update the oracle entity to establish bidirectional relationship
-  let oracle = Oracle.load(event.params.oracle);
-  if (oracle) {
-    oracle.pool = event.params.pool;
-    oracle.save();
-  }
 
   // Create initial Cycle entity
   let cycleId = event.params.pool.toHexString() + "-1";

@@ -9,7 +9,6 @@ type Pool @entity(immutable: false) {
   reserveTokenSymbol: String
   reserveTokenDecimals: Int
   oracle: Oracle! # oracle
-  assetPrice: BigInt
   poolStrategy: Strategy! # strategy
   poolCycleManager: Bytes!
   poolLiquidityManager: Bytes!
