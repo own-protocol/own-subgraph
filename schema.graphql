@@ -227,3 +227,13 @@ type FeeEvent @entity(immutable: false) {
   transactionHash: Bytes!
   blockNumber: BigInt!
 }
+
+type CycleManagerPool @entity(immutable: true) {
+  id: Bytes! # cycleManager address
+  pool: Pool!
+}
+
+type LiquidityManagerPool @entity(immutable: true) {
+  id: Bytes! # liquidityManager address
+  pool: Pool!
+}
