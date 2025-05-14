@@ -22,6 +22,7 @@ import {
   ProtocolEvent,
   LPRequest,
   FeeEvent,
+  LiquidityManagerPool,
 } from "../generated/schema";
 
 // Helper function to get or create LP position
@@ -53,8 +54,15 @@ function getOrCreateLPPosition(
 
 export function handleCollateralAdded(event: CollateralAdded): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Get or create LP position
   let lpPosition = getOrCreateLPPosition(
@@ -82,8 +90,15 @@ export function handleCollateralAdded(event: CollateralAdded): void {
 
 export function handleCollateralReduced(event: CollateralReduced): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Get or create LP position
   let lpPosition = getOrCreateLPPosition(
@@ -111,8 +126,15 @@ export function handleCollateralReduced(event: CollateralReduced): void {
 
 export function handleInterestClaimed(event: InterestClaimed): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Get or create LP position
   let lpPosition = getOrCreateLPPosition(
@@ -140,9 +162,16 @@ export function handleInterestClaimed(event: InterestClaimed): void {
 
 export function handleLPAdded(event: LPAdded): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
   let collateral = event.params.collateral;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Get or create LP position
   let lpPosition = getOrCreateLPPosition(
@@ -179,7 +208,14 @@ export function handleLPAdded(event: LPAdded): void {
 
 export function handleLPRemoved(event: LPRemoved): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Get LP position
   let positionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
@@ -221,8 +257,15 @@ export function handleLPRemoved(event: LPRemoved): void {
 
 export function handleLiquidityAdded(event: LiquidityAdded): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Get or create LP position
   let lpPosition = getOrCreateLPPosition(
@@ -250,8 +293,15 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
 
 export function handleLiquidityReduced(event: LiquidityReduced): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Get or create LP position
   let lpPosition = getOrCreateLPPosition(
@@ -281,9 +331,16 @@ export function handleLiquidityAdditionRequested(
   event: LiquidityAdditionRequested
 ): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
   let cycle = event.params.cycle;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Create LP request
   let requestId =
@@ -332,9 +389,16 @@ export function handleLiquidityReductionRequested(
   event: LiquidityReductionRequested
 ): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
   let cycle = event.params.cycle;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Create LP request
   let requestId =
@@ -383,9 +447,16 @@ export function handleLPLiquidationRequested(
   event: LPLiquidationRequested
 ): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let cycle = event.params.cycle;
   let amount = event.params.amount;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Create LP request
   let requestId =
@@ -434,10 +505,17 @@ export function handleLPLiquidationExecuted(
   event: LPLiquidationExecuted
 ): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let liquidator = event.params.liquidator;
   let amount = event.params.amount;
   let reward = event.params.reward;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Update LP position
   let lpPosition = getOrCreateLPPosition(
@@ -484,7 +562,14 @@ export function handleLPLiquidationExecuted(
 
 export function handleLiquidationCancelled(event: LiquidationCancelled): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Find and update request status
   let pool = Pool.load(poolAddress);
@@ -523,9 +608,16 @@ export function handleRebalanceAmountTransferred(
   event: RebalanceAmountTransferred
 ): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
   let cycleIndex = event.params.cycleIndex;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Create protocol event
   let eventId =
@@ -543,8 +635,15 @@ export function handleRebalanceAmountTransferred(
 
 export function handleFeeDeducted(event: FeeDeducted): void {
   let userAddress = event.params.user;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Create fee event - make sure to import FeeEvent if not already imported
   let id =
@@ -563,9 +662,16 @@ export function handleInterestDistributedToLP(
   event: InterestDistributedToLP
 ): void {
   let lpAddress = event.params.lp;
-  let poolAddress = event.address;
+  let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
   let cycleIndex = event.params.cycleIndex;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Update LP position
   let lpPosition = getOrCreateLPPosition(

@@ -6,12 +6,25 @@ import {
   InterestAccrued,
   isPriceDeviationValidUpdated,
 } from "../generated/templates/PoolCycleManager/PoolCycleManager";
-import { Pool, Cycle, LPPosition, LPRebalance } from "../generated/schema";
+import {
+  Pool,
+  Cycle,
+  LPPosition,
+  LPRebalance,
+  CycleManagerPool,
+} from "../generated/schema";
 
 export function handleCycleStarted(event: CycleStarted): void {
-  let poolAddress = event.address;
+  let cycleManagerAddress = event.address;
   let cycleIndex = event.params.cycleIndex;
   let timestamp = event.params.timestamp;
+
+  let cycleManager = CycleManagerPool.load(cycleManagerAddress);
+  if (cycleManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(cycleManager.pool);
 
   // Load the pool
   let pool = Pool.load(poolAddress);
@@ -56,10 +69,17 @@ export function handleCycleStarted(event: CycleStarted): void {
 }
 
 export function handleRebalanceInitiated(event: RebalanceInitiated): void {
-  let poolAddress = event.address;
+  let cycleManagerAddress = event.address;
   let cycleIndex = event.params.cycleIndex;
   let cyclePriceHigh = event.params.cyclePriceHigh;
   let cyclePriceLow = event.params.cyclePriceLow;
+
+  let cycleManager = CycleManagerPool.load(cycleManagerAddress);
+  if (cycleManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(cycleManager.pool);
 
   // Update pool data
   let pool = Pool.load(poolAddress);
@@ -85,12 +105,19 @@ export function handleRebalanceInitiated(event: RebalanceInitiated): void {
 }
 
 export function handleRebalanced(event: Rebalanced): void {
-  let poolAddress = event.address;
+  let cycleManagerAddress = event.address;
   let lpAddress = event.params.lp;
   let rebalancePrice = event.params.rebalancePrice;
   let amount = event.params.amount;
   let isDeposit = event.params.isDeposit;
   let cycleIndex = event.params.cycleIndex;
+
+  let cycleManager = CycleManagerPool.load(cycleManagerAddress);
+  if (cycleManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(cycleManager.pool);
 
   // Update pool data
   let pool = Pool.load(poolAddress);
@@ -146,10 +173,17 @@ export function handleRebalanced(event: Rebalanced): void {
 }
 
 export function handleInterestAccrued(event: InterestAccrued): void {
-  let poolAddress = event.address;
+  let cycleManagerAddress = event.address;
   let interestAccrued = event.params.interestAccrued;
   let cumulativeInterest = event.params.cumulativeInterest;
   let timestamp = event.params.timestamp;
+
+  let cycleManager = CycleManagerPool.load(cycleManagerAddress);
+  if (cycleManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(cycleManager.pool);
 
   // Update pool data
   let pool = Pool.load(poolAddress);

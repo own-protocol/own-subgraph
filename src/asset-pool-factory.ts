@@ -4,7 +4,14 @@ import {
   OwnershipTransferred as OwnershipTransferredEvent,
   RegistryUpdated as RegistryUpdatedEvent,
 } from "../generated/AssetPoolFactory/AssetPoolFactory";
-import { Pool, Oracle, Strategy, Cycle } from "../generated/schema";
+import {
+  Pool,
+  Oracle,
+  Strategy,
+  Cycle,
+  CycleManagerPool,
+  LiquidityManagerPool,
+} from "../generated/schema";
 import { AssetPool } from "../generated/templates/AssetPool/AssetPool";
 import { XToken } from "../generated/templates/XToken/XToken";
 import { ERC20 } from "../generated/templates/ERC20/ERC20";
@@ -88,7 +95,23 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.oracle = event.params.oracle;
   pool.assetToken = assetTokenAddress;
   pool.poolCycleManager = poolCycleManagerAddress;
+
+  if (poolCycleManagerAddress != Address.zero()) {
+    let cycleManagerPool = new CycleManagerPool(poolCycleManagerAddress);
+    cycleManagerPool.pool = event.params.pool;
+    cycleManagerPool.save();
+  }
+
   pool.poolLiquidityManager = poolLiquidityManagerAddress;
+
+  if (poolLiquidityManagerAddress != Address.zero()) {
+    let poolLiquidityManager = new LiquidityManagerPool(
+      poolLiquidityManagerAddress
+    );
+    poolLiquidityManager.pool = event.params.pool;
+    poolLiquidityManager.save();
+  }
+
   pool.poolStrategy = poolStrategyAddress; // This creates the relationship with Strategy
   pool.createdAt = event.block.timestamp;
   pool.updatedAt = event.block.timestamp;
