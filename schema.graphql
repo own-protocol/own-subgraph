@@ -8,7 +8,7 @@ type Pool @entity(immutable: false) {
   reserveToken: Bytes! # reserve token address
   reserveTokenSymbol: String
   reserveTokenDecimals: Int
-  oracle: Bytes! # oracle address
+  oracle: Oracle! # oracle
   assetPrice: BigInt
   poolStrategy: Strategy! # strategy
   poolCycleManager: Bytes!
@@ -62,9 +62,11 @@ type Oracle @entity(immutable: false) {
   isVerified: Boolean!
   createdAt: BigInt!
   updatedAt: BigInt!
-  pool: Bytes
   splitDetected: Boolean
   preSplitPrice: BigInt
+
+  # Relations
+  pool: [Pool!]! @derivedFrom(field: "oracle")
 }
 
 type Strategy @entity(immutable: false) {
