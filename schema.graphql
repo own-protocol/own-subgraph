@@ -12,6 +12,8 @@ type Pool @entity(immutable: false) {
   poolStrategy: Strategy! # strategy
   poolCycleManager: Bytes!
   poolLiquidityManager: Bytes!
+  poolInterestRate: BigInt # Current interest rate (scaled by BPS)
+  poolUtilizationRatio: BigInt # Current utilization ratio (scaled by BPS)
   createdAt: BigInt!
   updatedAt: BigInt!
   isVerified: Boolean!

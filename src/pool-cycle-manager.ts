@@ -6,6 +6,8 @@ import {
   InterestAccrued,
   isPriceDeviationValidUpdated,
 } from "../generated/templates/PoolCycleManager/PoolCycleManager";
+import { PoolLiquidityManager } from "../generated/templates/PoolLiquidityManager/PoolLiquidityManager";
+import { DefaultPoolStrategy } from "../generated/templates/DefaultPoolStrategy/DefaultPoolStrategy";
 import {
   Pool,
   Cycle,
@@ -65,6 +67,34 @@ export function handleCycleStarted(event: CycleStarted): void {
   pool.rebalancedLPs = BigInt.fromI32(0);
   pool.cycleInterestAmount = BigInt.fromI32(0);
   pool.updatedAt = event.block.timestamp;
+
+  // Fetch totalLPLiquidityCommited from the liquidity manager
+  if (pool.poolLiquidityManager) {
+    let liquidityManagerAddress = Address.fromBytes(pool.poolLiquidityManager);
+    let liquidityManager = PoolLiquidityManager.bind(liquidityManagerAddress);
+    let totalLiquidityCall = liquidityManager.try_totalLPLiquidityCommited();
+    if (!totalLiquidityCall.reverted) {
+      pool.totalLPLiquidityCommited = totalLiquidityCall.value;
+    }
+  }
+
+  // Fetch interest rate and utilization from the strategy
+  if (pool.poolStrategy) {
+    let strategyAddress = Address.fromBytes(pool.poolStrategy);
+    let strategy = DefaultPoolStrategy.bind(strategyAddress);
+
+    let interestRateCall = strategy.try_calculatePoolInterestRate(poolAddress);
+    if (!interestRateCall.reverted) {
+      pool.poolInterestRate = interestRateCall.value;
+    }
+
+    let utilizationCall =
+      strategy.try_calculatePoolUtilizationRatio(poolAddress);
+    if (!utilizationCall.reverted) {
+      pool.poolUtilizationRatio = utilizationCall.value;
+    }
+  }
+
   pool.save();
 }
 
