@@ -9,7 +9,7 @@ import {
 } from "../generated/templates/PoolCycleManager/PoolCycleManager";
 import { PoolLiquidityManager } from "../generated/templates/PoolLiquidityManager/PoolLiquidityManager";
 import { DefaultPoolStrategy } from "../generated/templates/DefaultPoolStrategy/DefaultPoolStrategy";
-import { Pool, CycleManagerPool } from "../generated/schema";
+import { Pool, CycleManagerPool, LPPosition } from "../generated/schema";
 
 export function handleCycleStarted(event: CycleStarted): void {
   let cycleManagerAddress = event.address;
@@ -118,6 +118,14 @@ export function handleRebalanced(event: Rebalanced): void {
   }
 
   let poolAddress = Address.fromBytes(cycleManager.pool);
+
+  let id = lpAddress.toHexString() + "-" + poolAddress.toHexString();
+  let lpPosition = LPPosition.load(id);
+
+  if (lpPosition != null) {
+    lpPosition.lastRebalanceCycle = cycleIndex;
+    lpPosition.lastRebalancePrice = rebalancePrice;
+  }
 
   // Update pool data
   let pool = Pool.load(poolAddress);
