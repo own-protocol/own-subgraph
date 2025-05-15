@@ -41,9 +41,9 @@ function getOrCreateLPPosition(
     lpPosition.collateralAmount = BigInt.fromI32(0);
     lpPosition.interestAccrued = BigInt.fromI32(0);
     lpPosition.liquidityHealth = 3; // Healthy
-    lpPosition.assetHoldingValue = BigInt.fromI32(0);
-    lpPosition.liquidityShare = BigInt.fromI32(0);
     lpPosition.assetShare = BigInt.fromI32(0);
+    lpPosition.lastRebalanceCycle = BigInt.fromI32(0);
+    lpPosition.lastRebalancePrice = BigInt.fromI32(0);
     lpPosition.createdAt = timestamp;
     lpPosition.updatedAt = timestamp;
   }
@@ -173,8 +173,6 @@ export function handleLPRemoved(event: LPRemoved): void {
     lpPosition.liquidityCommitment = BigInt.fromI32(0);
     lpPosition.collateralAmount = BigInt.fromI32(0);
     lpPosition.interestAccrued = BigInt.fromI32(0);
-    lpPosition.assetHoldingValue = BigInt.fromI32(0);
-    lpPosition.liquidityShare = BigInt.fromI32(0);
     lpPosition.assetShare = BigInt.fromI32(0);
     lpPosition.updatedAt = event.block.timestamp;
     lpPosition.save();
@@ -261,13 +259,11 @@ export function handleLiquidityAdditionRequested(
   let lpPositionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
 
   let lpRequest = new LPRequest(requestId);
-  lpRequest.lpPosition = lpPositionId;
   lpRequest.requestType = "ADD_LIQUIDITY";
   lpRequest.requestAmount = amount;
   lpRequest.requestCycle = cycle;
   lpRequest.createdAt = event.block.timestamp;
   lpRequest.updatedAt = event.block.timestamp;
-  lpRequest.status = "PENDING";
   lpRequest.save();
 
   // Update pool stats using a safer approach
@@ -306,13 +302,11 @@ export function handleLiquidityReductionRequested(
   let lpPositionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
 
   let lpRequest = new LPRequest(requestId);
-  lpRequest.lpPosition = lpPositionId;
   lpRequest.requestType = "REDUCE_LIQUIDITY";
   lpRequest.requestAmount = amount;
   lpRequest.requestCycle = cycle;
   lpRequest.createdAt = event.block.timestamp;
   lpRequest.updatedAt = event.block.timestamp;
-  lpRequest.status = "PENDING";
   lpRequest.save();
 
   // Update pool stats
@@ -351,13 +345,11 @@ export function handleLPLiquidationRequested(
   let lpPositionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
 
   let lpRequest = new LPRequest(requestId);
-  lpRequest.lpPosition = lpPositionId;
   lpRequest.requestType = "LIQUIDATE";
   lpRequest.requestAmount = amount;
   lpRequest.requestCycle = cycle;
   lpRequest.createdAt = event.block.timestamp;
   lpRequest.updatedAt = event.block.timestamp;
-  lpRequest.status = "PENDING";
   lpRequest.save();
 
   // Update pool stats
@@ -409,7 +401,6 @@ export function handleLPLiquidationExecuted(
     let lpRequest = LPRequest.load(requestId);
 
     if (lpRequest != null && lpRequest.requestType == "LIQUIDATE") {
-      lpRequest.status = "COMPLETED";
       lpRequest.updatedAt = event.block.timestamp;
       lpRequest.save();
     }
@@ -440,7 +431,6 @@ export function handleLiquidationCancelled(event: LiquidationCancelled): void {
     let lpRequest = LPRequest.load(requestId);
 
     if (lpRequest != null && lpRequest.requestType == "LIQUIDATE") {
-      lpRequest.status = "CANCELLED";
       lpRequest.updatedAt = event.block.timestamp;
       lpRequest.save();
     }

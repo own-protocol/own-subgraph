@@ -8,13 +8,7 @@ import {
 } from "../generated/templates/PoolCycleManager/PoolCycleManager";
 import { PoolLiquidityManager } from "../generated/templates/PoolLiquidityManager/PoolLiquidityManager";
 import { DefaultPoolStrategy } from "../generated/templates/DefaultPoolStrategy/DefaultPoolStrategy";
-import {
-  Pool,
-  Cycle,
-  LPPosition,
-  LPRebalance,
-  CycleManagerPool,
-} from "../generated/schema";
+import { Pool, CycleManagerPool } from "../generated/schema";
 
 export function handleCycleStarted(event: CycleStarted): void {
   let cycleManagerAddress = event.address;
@@ -33,29 +27,6 @@ export function handleCycleStarted(event: CycleStarted): void {
   if (pool == null) {
     return; // Pool doesn't exist, exit early
   }
-
-  let prevCycleId =
-    poolAddress.toHexString() + "-" + pool.cycleIndex.toString();
-  let prevCycle = Cycle.load(prevCycleId);
-  if (prevCycle != null) {
-    prevCycle.endTime = timestamp;
-    prevCycle.save();
-  }
-
-  // Create a new cycle entity
-  let newCycleId = poolAddress.toHexString() + "-" + cycleIndex.toString();
-  let newCycle = new Cycle(newCycleId);
-  newCycle.pool = poolAddress;
-  newCycle.cycleIndex = cycleIndex;
-  newCycle.state = "POOL_ACTIVE";
-  newCycle.startTime = timestamp;
-  newCycle.totalDeposits = BigInt.fromI32(0);
-  newCycle.totalRedemptions = BigInt.fromI32(0);
-  newCycle.totalAddLiquidity = BigInt.fromI32(0);
-  newCycle.totalReduceLiquidity = BigInt.fromI32(0);
-  newCycle.lpCount = BigInt.fromI32(0);
-  newCycle.rebalancedLPs = BigInt.fromI32(0);
-  newCycle.save();
 
   // Update pool with new cycle
   pool.cycleIndex = cycleIndex;
@@ -122,16 +93,6 @@ export function handleRebalanceInitiated(event: RebalanceInitiated): void {
   pool.cyclePriceLow = cyclePriceLow;
   pool.updatedAt = event.block.timestamp;
   pool.save();
-
-  // Update cycle entity
-  let cycleId = poolAddress.toHexString() + "-" + cycleIndex.toString();
-  let cycle = Cycle.load(cycleId);
-  if (cycle != null) {
-    cycle.state = "POOL_REBALANCING_ONCHAIN";
-    cycle.priceHigh = cyclePriceHigh;
-    cycle.priceLow = cyclePriceLow;
-    cycle.save();
-  }
 }
 
 export function handleRebalanced(event: Rebalanced): void {
@@ -159,47 +120,6 @@ export function handleRebalanced(event: Rebalanced): void {
   pool.rebalancedLPs = pool.rebalancedLPs.plus(BigInt.fromI32(1));
   pool.updatedAt = event.block.timestamp;
   pool.save();
-
-  // Update cycle data
-  let cycleId = poolAddress.toHexString() + "-" + cycleIndex.toString();
-  let cycle = Cycle.load(cycleId);
-  if (cycle != null) {
-    // Initialize rebalancedLPs if not set
-    if (!cycle.rebalancedLPs) {
-      cycle.rebalancedLPs = BigInt.fromI32(0);
-    }
-
-    cycle.rebalancedLPs = cycle.rebalancedLPs.plus(BigInt.fromI32(1));
-    cycle.rebalancePrice = rebalancePrice;
-
-    // If lpCount is null or zero but pool has LP count, use that
-    if (!cycle.lpCount || cycle.lpCount.isZero()) {
-      if (pool.lpCount) {
-        cycle.lpCount = pool.lpCount;
-      } else {
-        cycle.lpCount = BigInt.fromI32(0);
-      }
-    }
-
-    cycle.save();
-  }
-
-  // Create LP rebalance record
-  let lpPositionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
-  let lpPosition = LPPosition.load(lpPositionId);
-  if (lpPosition != null) {
-    let rebalanceId = lpPositionId + "-" + cycleIndex.toString();
-    let lpRebalance = new LPRebalance(rebalanceId);
-    lpRebalance.cycle = cycleId;
-    lpRebalance.lpPosition = lpPositionId;
-    lpRebalance.cycleIndex = cycleIndex;
-    lpRebalance.rebalancePrice = rebalancePrice;
-    lpRebalance.amount = amount;
-    lpRebalance.isDeposit = isDeposit;
-    lpRebalance.timestamp = event.block.timestamp;
-    lpRebalance.wasSettled = false;
-    lpRebalance.save();
-  }
 }
 
 export function handleInterestAccrued(event: InterestAccrued): void {
@@ -224,16 +144,6 @@ export function handleInterestAccrued(event: InterestAccrued): void {
   pool.cycleInterestAmount = interestAccrued;
   pool.updatedAt = event.block.timestamp;
   pool.save();
-
-  // If we have a valid cycle index, update the current cycle
-  if (pool.cycleIndex) {
-    let cycleId = poolAddress.toHexString() + "-" + pool.cycleIndex.toString();
-    let cycle = Cycle.load(cycleId);
-    if (cycle != null) {
-      cycle.cyclePoolInterest = cumulativeInterest;
-      cycle.save();
-    }
-  }
 }
 
 export function handleIsPriceDeviationValidUpdated(
