@@ -208,18 +208,6 @@ type Cycle @entity(immutable: false) {
   rebalances: [LPRebalance!]! @derivedFrom(field: "cycle")
 }
 
-# Entity to track protocol events
-type ProtocolEvent @entity(immutable: false) {
-  id: ID! # tx hash + log index
-  pool: Pool
-  eventType: String! # DEPOSIT, REDEEM, LIQUIDATION, REBALANCE, etc.
-  user: Bytes
-  amount: BigInt
-  timestamp: BigInt!
-  transactionHash: Bytes!
-  blockNumber: BigInt!
-}
-
 # Entity to track fee collection
 type FeeEvent @entity(immutable: false) {
   id: ID! # tx hash + log index

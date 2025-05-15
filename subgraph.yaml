@@ -86,7 +86,6 @@ templates:
         - Pool
         - UserPosition
         - UserRequest
-        - ProtocolEvent
         - FeeEvent
       abis:
         - name: AssetPool
@@ -163,7 +162,6 @@ templates:
         - Pool
         - LPPosition
         - LPRequest
-        - ProtocolEvent
         - FeeEvent
         - Cycle
       abis:

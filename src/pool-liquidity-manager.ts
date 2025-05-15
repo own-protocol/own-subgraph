@@ -19,7 +19,6 @@ import {
 import {
   Pool,
   LPPosition,
-  ProtocolEvent,
   LPRequest,
   FeeEvent,
   LiquidityManagerPool,
@@ -73,19 +72,6 @@ export function handleCollateralAdded(event: CollateralAdded): void {
   lpPosition.collateralAmount = lpPosition.collateralAmount.plus(amount);
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_COLLATERAL_ADDED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleCollateralReduced(event: CollateralReduced): void {
@@ -109,19 +95,6 @@ export function handleCollateralReduced(event: CollateralReduced): void {
   lpPosition.collateralAmount = lpPosition.collateralAmount.minus(amount);
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_COLLATERAL_REDUCED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleInterestClaimed(event: InterestClaimed): void {
@@ -145,19 +118,6 @@ export function handleInterestClaimed(event: InterestClaimed): void {
   lpPosition.interestAccrued = BigInt.fromI32(0); // Reset after claiming
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_INTEREST_CLAIMED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLPAdded(event: LPAdded): void {
@@ -191,19 +151,6 @@ export function handleLPAdded(event: LPAdded): void {
     pool.updatedAt = event.block.timestamp;
     pool.save();
   }
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_ADDED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLPRemoved(event: LPRemoved): void {
@@ -240,19 +187,6 @@ export function handleLPRemoved(event: LPRemoved): void {
     pool.updatedAt = event.block.timestamp;
     pool.save();
   }
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_REMOVED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = BigInt.fromI32(0);
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLiquidityAdded(event: LiquidityAdded): void {
@@ -276,19 +210,6 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
   lpPosition.liquidityCommitment = lpPosition.liquidityCommitment.plus(amount);
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_LIQUIDITY_ADDED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLiquidityReduced(event: LiquidityReduced): void {
@@ -312,19 +233,6 @@ export function handleLiquidityReduced(event: LiquidityReduced): void {
   lpPosition.liquidityCommitment = lpPosition.liquidityCommitment.minus(amount);
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_LIQUIDITY_REDUCED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLiquidityAdditionRequested(
@@ -370,19 +278,6 @@ export function handleLiquidityAdditionRequested(
     pool.updatedAt = event.block.timestamp;
     pool.save();
   }
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_LIQUIDITY_ADDITION_REQUESTED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLiquidityReductionRequested(
@@ -428,19 +323,6 @@ export function handleLiquidityReductionRequested(
     pool.updatedAt = event.block.timestamp;
     pool.save();
   }
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_LIQUIDITY_REDUCTION_REQUESTED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLPLiquidationRequested(
@@ -486,19 +368,6 @@ export function handleLPLiquidationRequested(
     pool.updatedAt = event.block.timestamp;
     pool.save();
   }
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_LIQUIDATION_REQUESTED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLPLiquidationExecuted(
@@ -545,19 +414,6 @@ export function handleLPLiquidationExecuted(
       lpRequest.save();
     }
   }
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_LIQUIDATION_EXECUTED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleLiquidationCancelled(event: LiquidationCancelled): void {
@@ -589,48 +445,12 @@ export function handleLiquidationCancelled(event: LiquidationCancelled): void {
       lpRequest.save();
     }
   }
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_LIQUIDATION_CANCELLED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = BigInt.fromI32(0);
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 export function handleRebalanceAmountTransferred(
   event: RebalanceAmountTransferred
 ): void {
-  let lpAddress = event.params.lp;
-  let liquidityManagerAddress = event.address;
-  let amount = event.params.amount;
-  let cycleIndex = event.params.cycleIndex;
-
-  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
-  if (liquidityManager == null) {
-    return; // Mapping doesn't exist, exit early
-  }
-
-  let poolAddress = Address.fromBytes(liquidityManager.pool);
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_REBALANCE_AMOUNT_TRANSFERRED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
+  return; // No action needed for this event
 }
 
 export function handleFeeDeducted(event: FeeDeducted): void {
@@ -682,17 +502,4 @@ export function handleInterestDistributedToLP(
   lpPosition.interestAccrued = lpPosition.interestAccrued.plus(amount);
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
-
-  // Create protocol event
-  let eventId =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(eventId);
-  protocolEvent.pool = poolAddress;
-  protocolEvent.eventType = "LP_INTEREST_DISTRIBUTED";
-  protocolEvent.user = lpAddress;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }

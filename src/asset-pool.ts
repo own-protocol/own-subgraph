@@ -13,13 +13,7 @@ import {
   FeeDeducted,
 } from "../generated/templates/AssetPool/AssetPool";
 import { XToken } from "../generated/templates/XToken/XToken";
-import {
-  Pool,
-  UserPosition,
-  UserRequest,
-  ProtocolEvent,
-  FeeEvent,
-} from "../generated/schema";
+import { Pool, UserPosition, UserRequest, FeeEvent } from "../generated/schema";
 
 // Helper to create or update user position
 function getOrCreateUserPosition(
@@ -43,27 +37,6 @@ function getOrCreateUserPosition(
   }
 
   return userPosition;
-}
-
-// Helper to create protocol event
-function createProtocolEvent(
-  event: ethereum.Event,
-  pool: Address,
-  eventType: string,
-  user: Address,
-  amount: BigInt
-): void {
-  let id =
-    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
-  let protocolEvent = new ProtocolEvent(id);
-  protocolEvent.pool = pool;
-  protocolEvent.eventType = eventType;
-  protocolEvent.user = user;
-  protocolEvent.amount = amount;
-  protocolEvent.timestamp = event.block.timestamp;
-  protocolEvent.transactionHash = event.transaction.hash;
-  protocolEvent.blockNumber = event.block.number;
-  protocolEvent.save();
 }
 
 // Helper to create or update user request
@@ -217,15 +190,6 @@ export function handleCollateralDeposited(event: CollateralDeposited): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(
-    event,
-    poolAddress,
-    "COLLATERAL_DEPOSIT",
-    userAddress,
-    amount
-  );
 }
 
 export function handleCollateralWithdrawn(event: CollateralWithdrawn): void {
@@ -248,15 +212,6 @@ export function handleCollateralWithdrawn(event: CollateralWithdrawn): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(
-    event,
-    poolAddress,
-    "COLLATERAL_WITHDRAWAL",
-    userAddress,
-    amount
-  );
 }
 
 export function handleDepositRequested(event: DepositRequested): void {
@@ -304,15 +259,6 @@ export function handleDepositRequested(event: DepositRequested): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(
-    event,
-    poolAddress,
-    "DEPOSIT_REQUEST",
-    userAddress,
-    amount
-  );
 }
 
 export function handleAssetClaimed(event: AssetClaimed): void {
@@ -350,9 +296,6 @@ export function handleAssetClaimed(event: AssetClaimed): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(event, poolAddress, "ASSET_CLAIMED", userAddress, amount);
 }
 
 export function handleRedemptionRequested(event: RedemptionRequested): void {
@@ -381,15 +324,6 @@ export function handleRedemptionRequested(event: RedemptionRequested): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(
-    event,
-    poolAddress,
-    "REDEMPTION_REQUEST",
-    userAddress,
-    amount
-  );
 }
 
 export function handleReserveWithdrawn(event: ReserveWithdrawn): void {
@@ -458,15 +392,6 @@ export function handleReserveWithdrawn(event: ReserveWithdrawn): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(
-    event,
-    poolAddress,
-    "RESERVE_WITHDRAWN",
-    userAddress,
-    amount
-  );
 }
 
 export function handleLiquidationRequested(event: LiquidationRequested): void {
@@ -490,15 +415,6 @@ export function handleLiquidationRequested(event: LiquidationRequested): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(
-    event,
-    poolAddress,
-    "LIQUIDATION_REQUESTED",
-    userAddress,
-    amount
-  );
 }
 
 export function handleLiquidationClaimed(event: LiquidationClaimed): void {
@@ -565,15 +481,6 @@ export function handleLiquidationClaimed(event: LiquidationClaimed): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(
-    event,
-    poolAddress,
-    "LIQUIDATION_CLAIMED",
-    userAddress,
-    amount
-  );
 }
 
 export function handleLiquidationCancelled(event: LiquidationCancelled): void {
@@ -603,15 +510,6 @@ export function handleLiquidationCancelled(event: LiquidationCancelled): void {
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
-
-  // Create protocol event
-  createProtocolEvent(
-    event,
-    poolAddress,
-    "LIQUIDATION_CANCELLED",
-    userAddress,
-    amount
-  );
 }
 
 export function handleFeeDeducted(event: FeeDeducted): void {
