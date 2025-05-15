@@ -18,7 +18,6 @@ dataSources:
       entities:
         - Pool
         - Oracle
-        - Cycle
       abis:
         - name: AssetPoolFactory
           file: ./abis/AssetPoolFactory.json
@@ -126,9 +125,7 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Pool
-        - Cycle
         - LPPosition
-        - LPRebalance
       abis:
         - name: PoolCycleManager
           file: ./abis/PoolCycleManager.json
@@ -163,7 +160,6 @@ templates:
         - LPPosition
         - LPRequest
         - FeeEvent
-        - Cycle
       abis:
         - name: PoolLiquidityManager
           file: ./abis/PoolLiquidityManager.json

@@ -43,11 +43,11 @@ type Pool @entity(immutable: false) {
   cyclePriceLow: BigInt
   cycleInterestAmount: BigInt
   rebalancedLPs: BigInt!
+  prevRebalancePrice: BigInt!
 
   # Relations
   users: [UserPosition!]! @derivedFrom(field: "pool")
   lpPositions: [LPPosition!]! @derivedFrom(field: "pool")
-  cycles: [Cycle!]! @derivedFrom(field: "pool")
 }
 
 type Oracle @entity(immutable: false) {
@@ -112,17 +112,11 @@ type UserPosition @entity(immutable: false) {
   collateralAmount: BigInt!
   createdAt: BigInt!
   updatedAt: BigInt!
-
-  # Health metrics
-  collateralHealth: Int # 3 = Healthy, 2 = Warning, 1 = Liquidatable
-  # Relations
-  request: UserRequest @derivedFrom(field: "userPosition")
 }
 
 # Entity to track user requests
 type UserRequest @entity(immutable: false) {
   id: ID! # user address + pool address + requestCycle
-  userPosition: UserPosition!
   requestType: String! # NONE, DEPOSIT, REDEEM, LIQUIDATE
   amount: BigInt!
   collateralAmount: BigInt
@@ -130,7 +124,6 @@ type UserRequest @entity(immutable: false) {
   liquidator: Bytes # only set if requestType is LIQUIDATE
   createdAt: BigInt!
   updatedAt: BigInt!
-  status: String! # PENDING, COMPLETED, CANCELLED
 }
 
 # Entity to track LP positions
@@ -145,67 +138,23 @@ type LPPosition @entity(immutable: false) {
   # Health metrics
   liquidityHealth: Int # 3 = Healthy, 2 = Warning, 1 = Liquidatable
   # LP analytics
-  assetHoldingValue: BigInt
-  liquidityShare: BigInt # in PRECISION (1e18)
   assetShare: BigInt
+  lastRebalanceCycle: BigInt
+  lastRebalancePrice: BigInt
 
   createdAt: BigInt!
   updatedAt: BigInt!
-
-  # Relations
-  request: LPRequest @derivedFrom(field: "lpPosition")
-  rebalanceHistory: [LPRebalance!]! @derivedFrom(field: "lpPosition")
 }
 
 # Entity to track LP requests
 type LPRequest @entity(immutable: false) {
   id: ID! # lp address + pool address + requestCycle
-  lpPosition: LPPosition!
   requestType: String! # NONE, ADD_LIQUIDITY, REDUCE_LIQUIDITY, LIQUIDATE
   requestAmount: BigInt!
   requestCycle: BigInt!
   liquidator: Bytes # only set if requestType is LIQUIDATE
   createdAt: BigInt!
   updatedAt: BigInt!
-  status: String! # PENDING, COMPLETED, CANCELLED
-}
-
-# Entity to track LP rebalance actions
-type LPRebalance @entity(immutable: false) {
-  id: ID! # lp address + pool address + cycleIndex
-  lpPosition: LPPosition!
-  cycleIndex: BigInt!
-  cycle: Cycle!
-  rebalancePrice: BigInt!
-  amount: BigInt!
-  isDeposit: Boolean!
-  timestamp: BigInt!
-  wasSettled: Boolean! # true if LP didn't rebalance and was settled automatically
-}
-
-# Entity to track cycle data
-type Cycle @entity(immutable: false) {
-  id: ID! # pool address + cycle index
-  pool: Pool!
-  cycleIndex: BigInt!
-  state: String! # POOL_ACTIVE, POOL_REBALANCING_OFFCHAIN, POOL_REBALANCING_ONCHAIN, POOL_HALTED
-  startTime: BigInt!
-  endTime: BigInt
-  rebalancePrice: BigInt
-  cyclePoolInterest: BigInt
-  priceHigh: BigInt
-  priceLow: BigInt
-
-  # Stats for the cycle
-  totalDeposits: BigInt!
-  totalRedemptions: BigInt!
-  totalAddLiquidity: BigInt!
-  totalReduceLiquidity: BigInt!
-  lpCount: BigInt!
-  rebalancedLPs: BigInt!
-
-  # Relations
-  rebalances: [LPRebalance!]! @derivedFrom(field: "cycle")
 }
 
 # Entity to track fee collection
@@ -221,10 +170,10 @@ type FeeEvent @entity(immutable: false) {
 
 type CycleManagerPool @entity(immutable: true) {
   id: Bytes! # cycleManager address
-  pool: Pool!
+  pool: Bytes!
 }
 
 type LiquidityManagerPool @entity(immutable: true) {
   id: Bytes! # liquidityManager address
-  pool: Pool!
+  pool: Bytes!
 }
