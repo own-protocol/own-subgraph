@@ -119,7 +119,7 @@ type UserRequest @entity(immutable: false) {
   id: ID! # user address + pool address + requestCycle
   requestType: String! # NONE, DEPOSIT, REDEEM, LIQUIDATE
   amount: BigInt!
-  collateralAmount: BigInt
+  collateralAmount: BigInt!
   requestCycle: BigInt!
   liquidator: Bytes # only set if requestType is LIQUIDATE
   createdAt: BigInt!

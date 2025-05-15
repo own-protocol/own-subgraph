@@ -38,37 +38,26 @@ function getOrCreateUserPosition(
   return userPosition;
 }
 
-// Helper to create or update user request
-function createUserRequest(
+// Helper to get or create user request
+function getOrCreateUserRequest(
   userAddress: Address,
   poolAddress: Address,
-  requestType: string,
-  amount: BigInt,
-  collateralAmount: BigInt,
-  requestCycle: BigInt,
-  timestamp: BigInt,
-  liquidator: Address | null = null
-): void {
-  // Get user position
-  let positionId = userAddress.toHexString() + "-" + poolAddress.toHexString();
-  let userPosition = UserPosition.load(positionId);
+  timestamp: BigInt
+): UserRequest {
+  let requestId = userAddress.toHexString() + "-" + poolAddress.toHexString();
+  let userRequest = UserRequest.load(requestId);
 
-  if (userPosition != null) {
-    let requestId = positionId + "-" + requestCycle.toString();
-    let userRequest = new UserRequest(requestId);
-    userRequest.requestType = requestType;
-    userRequest.amount = amount;
-    userRequest.collateralAmount = collateralAmount;
-    userRequest.requestCycle = requestCycle;
+  if (userRequest == null) {
+    userRequest = new UserRequest(requestId);
+    userRequest.requestType = "NONE";
+    userRequest.amount = BigInt.fromI32(0);
+    userRequest.collateralAmount = BigInt.fromI32(0);
+    userRequest.requestCycle = BigInt.fromI32(0);
     userRequest.createdAt = timestamp;
     userRequest.updatedAt = timestamp;
-
-    if (liquidator) {
-      userRequest.liquidator = liquidator;
-    }
-
-    userRequest.save();
   }
+
+  return userRequest;
 }
 
 // Helper to update pool data
@@ -176,13 +165,6 @@ export function handleDepositRequested(event: DepositRequested): void {
   let pool = Pool.load(poolAddress);
   if (pool == null) return;
 
-  // Get user's position
-  let userPosition = getOrCreateUserPosition(
-    userAddress,
-    poolAddress,
-    event.block.timestamp
-  );
-
   // Create deposit request
   let assetPoolContract = AssetPool.bind(poolAddress);
   let userRequestsCall = assetPoolContract.try_userRequests(userAddress);
@@ -192,22 +174,17 @@ export function handleDepositRequested(event: DepositRequested): void {
     collateralAmount = userRequestsCall.value.getCollateralAmount();
   }
 
-  createUserRequest(
+  let userRequest = getOrCreateUserRequest(
     userAddress,
     poolAddress,
-    "DEPOSIT",
-    amount,
-    collateralAmount,
-    cycle,
     event.block.timestamp
   );
-
-  // Update user position values
-  userPosition.depositAmount = userPosition.depositAmount.plus(amount);
-  userPosition.collateralAmount =
-    userPosition.collateralAmount.plus(collateralAmount);
-  userPosition.updatedAt = event.block.timestamp;
-  userPosition.save();
+  userRequest.requestType = "DEPOSIT";
+  userRequest.amount = amount;
+  userRequest.collateralAmount = collateralAmount;
+  userRequest.requestCycle = cycle;
+  userRequest.updatedAt = event.block.timestamp;
+  userRequest.save();
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
@@ -225,22 +202,26 @@ export function handleAssetClaimed(event: AssetClaimed): void {
     poolAddress,
     event.block.timestamp
   );
+  let userRequest = getOrCreateUserRequest(
+    userAddress,
+    poolAddress,
+    event.block.timestamp
+  );
   userPosition.assetAmount = userPosition.assetAmount.plus(amount);
+  userPosition.depositAmount = userPosition.depositAmount.plus(amount);
+  userPosition.collateralAmount = userPosition.collateralAmount.plus(
+    userRequest.collateralAmount
+  );
   userPosition.updatedAt = event.block.timestamp;
   userPosition.save();
 
-  // Update request status
-  let requestId =
-    userAddress.toHexString() +
-    "-" +
-    poolAddress.toHexString() +
-    "-" +
-    cycle.toString();
-  let userRequest = UserRequest.load(requestId);
-  if (userRequest != null) {
-    userRequest.updatedAt = event.block.timestamp;
-    userRequest.save();
-  }
+  // Update user request
+  userRequest.requestType = "NONE"; // Reset request type
+  userRequest.amount = BigInt.fromI32(0);
+  userRequest.collateralAmount = BigInt.fromI32(0); // No collateral for asset claim
+  userRequest.requestCycle = BigInt.fromI32(0); // Reset cycle
+  userRequest.updatedAt = event.block.timestamp;
+  userRequest.save();
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
@@ -252,23 +233,17 @@ export function handleRedemptionRequested(event: RedemptionRequested): void {
   let amount = event.params.assetAmount;
   let cycle = event.params.cycleIndex;
 
-  // Update user position
-  let userPosition = getOrCreateUserPosition(
+  let userRequest = getOrCreateUserRequest(
     userAddress,
     poolAddress,
     event.block.timestamp
   );
-
-  // Create redemption request
-  createUserRequest(
-    userAddress,
-    poolAddress,
-    "REDEEM",
-    amount,
-    BigInt.fromI32(0), // No collateral for redemption
-    cycle,
-    event.block.timestamp
-  );
+  userRequest.requestType = "REDEEM";
+  userRequest.amount = amount;
+  userRequest.collateralAmount = BigInt.fromI32(0); // No collateral for redemption
+  userRequest.requestCycle = cycle;
+  userRequest.updatedAt = event.block.timestamp;
+  userRequest.save();
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
@@ -287,52 +262,34 @@ export function handleReserveWithdrawn(event: ReserveWithdrawn): void {
     event.block.timestamp
   );
 
+  let userRequest = getOrCreateUserRequest(
+    userAddress,
+    poolAddress,
+    event.block.timestamp
+  );
+
   // Get asset pool contract to determine how much asset was redeemed
   let assetPoolContract = AssetPool.bind(poolAddress);
-  let userRequestsCall = assetPoolContract.try_userRequests(userAddress);
+  let userPositionsCall = assetPoolContract.try_userPositions(userAddress);
 
-  if (!userRequestsCall.reverted) {
-    let requestAmount = userRequestsCall.value.getAmount();
-    userPosition.assetAmount = userPosition.assetAmount.minus(requestAmount);
-
-    // Approximation of depositAmount and collateralAmount reduction
-    // In a real implementation, you would calculate this more precisely
-    if (
-      !userPosition.depositAmount.isZero() &&
-      !userPosition.assetAmount.isZero()
-    ) {
-      let reductionRatio = requestAmount
-        .times(BigInt.fromI32(1000000))
-        .div(userPosition.assetAmount.plus(requestAmount));
-      let depositReduction = userPosition.depositAmount
-        .times(reductionRatio)
-        .div(BigInt.fromI32(1000000));
-      let collateralReduction = userPosition.collateralAmount
-        .times(reductionRatio)
-        .div(BigInt.fromI32(1000000));
-
-      userPosition.depositAmount =
-        userPosition.depositAmount.minus(depositReduction);
-      userPosition.collateralAmount =
-        userPosition.collateralAmount.minus(collateralReduction);
-    }
+  if (!userPositionsCall.reverted) {
+    let assetAmount = userPositionsCall.value.getAssetAmount();
+    let depositAmount = userPositionsCall.value.getDepositAmount();
+    let collateralAmount = userPositionsCall.value.getCollateralAmount();
+    userPosition.assetAmount = assetAmount;
+    userPosition.depositAmount = depositAmount;
+    userPosition.collateralAmount = collateralAmount;
+    userPosition.updatedAt = event.block.timestamp;
+    userPosition.save();
   }
 
-  userPosition.updatedAt = event.block.timestamp;
-  userPosition.save();
-
-  // Update request status
-  let requestId =
-    userAddress.toHexString() +
-    "-" +
-    poolAddress.toHexString() +
-    "-" +
-    cycle.toString();
-  let userRequest = UserRequest.load(requestId);
-  if (userRequest != null) {
-    userRequest.updatedAt = event.block.timestamp;
-    userRequest.save();
-  }
+  // Update user request
+  userRequest.requestType = "NONE"; // Reset request type
+  userRequest.amount = BigInt.fromI32(0);
+  userRequest.collateralAmount = BigInt.fromI32(0); // No collateral for reserve withdrawal
+  userRequest.requestCycle = BigInt.fromI32(0); // Reset cycle
+  userRequest.updatedAt = event.block.timestamp;
+  userRequest.save();
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
@@ -345,17 +302,18 @@ export function handleLiquidationRequested(event: LiquidationRequested): void {
   let amount = event.params.amount;
   let cycle = event.params.cycleIndex;
 
-  // Create liquidation request
-  createUserRequest(
+  let userRequest = getOrCreateUserRequest(
     userAddress,
     poolAddress,
-    "LIQUIDATE",
-    amount,
-    BigInt.fromI32(0), // No additional collateral for liquidation
-    cycle,
-    event.block.timestamp,
-    liquidator
+    event.block.timestamp
   );
+  userRequest.requestType = "LIQUIDATE";
+  userRequest.amount = amount;
+  userRequest.collateralAmount = BigInt.fromI32(0); // No collateral for liquidation
+  userRequest.requestCycle = cycle;
+  userRequest.updatedAt = event.block.timestamp;
+  userRequest.liquidator = liquidator;
+  userRequest.save();
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
@@ -374,50 +332,37 @@ export function handleLiquidationClaimed(event: LiquidationClaimed): void {
     poolAddress,
     event.block.timestamp
   );
-  userPosition.assetAmount = userPosition.assetAmount.minus(amount);
 
-  // Approximation of depositAmount and collateralAmount reduction for liquidation
-  if (
-    !userPosition.depositAmount.isZero() &&
-    !userPosition.assetAmount.isZero()
-  ) {
-    let reductionRatio = amount
-      .times(BigInt.fromI32(1000000))
-      .div(userPosition.assetAmount.plus(amount));
-    let depositReduction = userPosition.depositAmount
-      .times(reductionRatio)
-      .div(BigInt.fromI32(1000000));
-    let collateralReduction = userPosition.collateralAmount
-      .times(reductionRatio)
-      .div(BigInt.fromI32(1000000));
+  let userRequest = getOrCreateUserRequest(
+    userAddress,
+    poolAddress,
+    event.block.timestamp
+  );
 
-    userPosition.depositAmount =
-      userPosition.depositAmount.minus(depositReduction);
-    userPosition.collateralAmount =
-      userPosition.collateralAmount.minus(collateralReduction);
+  // Get asset pool contract to determine how much asset was redeemed
+  let assetPoolContract = AssetPool.bind(poolAddress);
+  let userPositionsCall = assetPoolContract.try_userPositions(userAddress);
+
+  if (!userPositionsCall.reverted) {
+    let assetAmount = userPositionsCall.value.getAssetAmount();
+    let depositAmount = userPositionsCall.value.getDepositAmount();
+    let collateralAmount = userPositionsCall.value.getCollateralAmount();
+    userPosition.assetAmount = assetAmount;
+    userPosition.depositAmount = depositAmount;
+    userPosition.collateralAmount = collateralAmount;
+    userPosition.updatedAt = event.block.timestamp;
+    userPosition.save();
   }
 
-  userPosition.updatedAt = event.block.timestamp;
-  userPosition.save();
+  userRequest.requestType = "NONE"; // Reset request type
+  userRequest.amount = BigInt.fromI32(0);
+  userRequest.collateralAmount = BigInt.fromI32(0); // No collateral for liquidation
+  userRequest.requestCycle = BigInt.fromI32(0); // Reset cycle
+  userRequest.updatedAt = event.block.timestamp;
+  userRequest.save();
 
-  // Find and update liquidation request
-  // This is simplified - in reality you'd need to find the right request
   let pool = Pool.load(poolAddress);
   if (pool == null) return;
-
-  let cycleIndex = pool.cycleIndex.minus(BigInt.fromI32(1)); // Liquidation is claimed in the next cycle
-  let requestId =
-    userAddress.toHexString() +
-    "-" +
-    poolAddress.toHexString() +
-    "-" +
-    cycleIndex.toString();
-  let userRequest = UserRequest.load(requestId);
-
-  if (userRequest != null && userRequest.requestType == "LIQUIDATE") {
-    userRequest.updatedAt = event.block.timestamp;
-    userRequest.save();
-  }
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
@@ -433,18 +378,37 @@ export function handleLiquidationCancelled(event: LiquidationCancelled): void {
   let pool = Pool.load(poolAddress);
   if (pool == null) return;
 
-  let cycleIndex = pool.cycleIndex.minus(BigInt.fromI32(1));
-  let requestId =
-    userAddress.toHexString() +
-    "-" +
-    poolAddress.toHexString() +
-    "-" +
-    cycleIndex.toString();
-  let userRequest = UserRequest.load(requestId);
+  let userRequest = getOrCreateUserRequest(
+    userAddress,
+    poolAddress,
+    event.block.timestamp
+  );
+  userRequest.requestType = "NONE"; // Reset request type
+  userRequest.amount = BigInt.fromI32(0);
+  userRequest.collateralAmount = BigInt.fromI32(0); // No collateral for liquidation
+  userRequest.requestCycle = BigInt.fromI32(0); // Reset cycle
+  userRequest.updatedAt = event.block.timestamp;
+  userRequest.liquidator = null; // Clear liquidator
+  userRequest.save();
 
-  if (userRequest != null && userRequest.requestType == "LIQUIDATE") {
-    userRequest.updatedAt = event.block.timestamp;
-    userRequest.save();
+  // Update user position
+  let userPosition = getOrCreateUserPosition(
+    userAddress,
+    poolAddress,
+    event.block.timestamp
+  );
+
+  let assetPoolContract = AssetPool.bind(poolAddress);
+  let userPositionsCall = assetPoolContract.try_userPositions(userAddress);
+  if (!userPositionsCall.reverted) {
+    let assetAmount = userPositionsCall.value.getAssetAmount();
+    let depositAmount = userPositionsCall.value.getDepositAmount();
+    let collateralAmount = userPositionsCall.value.getCollateralAmount();
+    userPosition.assetAmount = assetAmount;
+    userPosition.depositAmount = depositAmount;
+    userPosition.collateralAmount = collateralAmount;
+    userPosition.updatedAt = event.block.timestamp;
+    userPosition.save();
   }
 
   // Update pool data
