@@ -123,7 +123,6 @@ export function handleInterestClaimed(event: InterestClaimed): void {
 export function handleLPAdded(event: LPAdded): void {
   let lpAddress = event.params.lp;
   let liquidityManagerAddress = event.address;
-  let amount = event.params.amount;
   let collateral = event.params.collateral;
 
   let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
@@ -139,7 +138,6 @@ export function handleLPAdded(event: LPAdded): void {
     poolAddress,
     event.block.timestamp
   );
-  lpPosition.liquidityCommitment = amount;
   lpPosition.collateralAmount = collateral;
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
@@ -199,6 +197,17 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
 
   let poolAddress = Address.fromBytes(liquidityManager.pool);
 
+  let id = lpAddress.toHexString() + "-" + poolAddress.toHexString();
+  let lpRequest = LPRequest.load(id);
+
+  if (lpRequest != null) {
+    // Update request status
+    lpRequest.requestType = "NONE";
+    lpRequest.requestAmount = BigInt.fromI32(0);
+    lpRequest.updatedAt = event.block.timestamp;
+    lpRequest.save();
+  }
+
   // Get or create LP position
   let lpPosition = getOrCreateLPPosition(
     lpAddress,
@@ -222,15 +231,29 @@ export function handleLiquidityReduced(event: LiquidityReduced): void {
 
   let poolAddress = Address.fromBytes(liquidityManager.pool);
 
+  let id = lpAddress.toHexString() + "-" + poolAddress.toHexString();
+  let lpRequest = LPRequest.load(id);
+
+  if (lpRequest != null) {
+    // Update request status
+    lpRequest.requestType = "NONE";
+    lpRequest.requestAmount = BigInt.fromI32(0);
+    lpRequest.updatedAt = event.block.timestamp;
+    lpRequest.save();
+  }
+
   // Get or create LP position
   let lpPosition = getOrCreateLPPosition(
     lpAddress,
     poolAddress,
     event.block.timestamp
   );
-  lpPosition.liquidityCommitment = lpPosition.liquidityCommitment.minus(amount);
-  lpPosition.updatedAt = event.block.timestamp;
-  lpPosition.save();
+  if (lpPosition.liquidityCommitment.ge(amount)) {
+    lpPosition.liquidityCommitment =
+      lpPosition.liquidityCommitment.minus(amount);
+    lpPosition.updatedAt = event.block.timestamp;
+    lpPosition.save();
+  }
 }
 
 export function handleLiquidityAdditionRequested(
@@ -249,14 +272,7 @@ export function handleLiquidityAdditionRequested(
   let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Create LP request
-  let requestId =
-    lpAddress.toHexString() +
-    "-" +
-    poolAddress.toHexString() +
-    "-" +
-    cycle.toString();
-
-  let lpPositionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
+  let requestId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
 
   let lpRequest = new LPRequest(requestId);
   lpRequest.requestType = "ADD_LIQUIDITY";
@@ -292,14 +308,7 @@ export function handleLiquidityReductionRequested(
   let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Create LP request
-  let requestId =
-    lpAddress.toHexString() +
-    "-" +
-    poolAddress.toHexString() +
-    "-" +
-    cycle.toString();
-
-  let lpPositionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
+  let requestId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
 
   let lpRequest = new LPRequest(requestId);
   lpRequest.requestType = "REDUCE_LIQUIDITY";
@@ -335,14 +344,7 @@ export function handleLPLiquidationRequested(
   let poolAddress = Address.fromBytes(liquidityManager.pool);
 
   // Create LP request
-  let requestId =
-    lpAddress.toHexString() +
-    "-" +
-    poolAddress.toHexString() +
-    "-" +
-    cycle.toString();
-
-  let lpPositionId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
+  let requestId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
 
   let lpRequest = new LPRequest(requestId);
   lpRequest.requestType = "LIQUIDATE";
@@ -391,16 +393,12 @@ export function handleLPLiquidationExecuted(
   // Find and update request status
   let pool = Pool.load(poolAddress);
   if (pool != null) {
-    let prevCycleIndex = pool.cycleIndex.minus(BigInt.fromI32(1));
-    let requestId =
-      lpAddress.toHexString() +
-      "-" +
-      poolAddress.toHexString() +
-      "-" +
-      prevCycleIndex.toString();
+    let requestId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
     let lpRequest = LPRequest.load(requestId);
 
     if (lpRequest != null && lpRequest.requestType == "LIQUIDATE") {
+      lpRequest.requestType = "NONE";
+      lpRequest.requestAmount = BigInt.fromI32(0);
       lpRequest.updatedAt = event.block.timestamp;
       lpRequest.save();
     }
@@ -421,16 +419,12 @@ export function handleLiquidationCancelled(event: LiquidationCancelled): void {
   // Find and update request status
   let pool = Pool.load(poolAddress);
   if (pool != null) {
-    let cycleIndex = pool.cycleIndex; // Cancellation happens in the same cycle
-    let requestId =
-      lpAddress.toHexString() +
-      "-" +
-      poolAddress.toHexString() +
-      "-" +
-      cycleIndex.toString();
+    let requestId = lpAddress.toHexString() + "-" + poolAddress.toHexString();
     let lpRequest = LPRequest.load(requestId);
 
     if (lpRequest != null && lpRequest.requestType == "LIQUIDATE") {
+      lpRequest.requestType = "NONE";
+      lpRequest.requestAmount = BigInt.fromI32(0);
       lpRequest.updatedAt = event.block.timestamp;
       lpRequest.save();
     }
