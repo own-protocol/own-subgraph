@@ -133,6 +133,10 @@ templates:
       abis:
         - name: PoolCycleManager
           file: ./abis/PoolCycleManager.json
+        - name: PoolLiquidityManager
+          file: ./abis/PoolLiquidityManager.json
+        - name: DefaultPoolStrategy
+          file: ./abis/DefaultPoolStrategy.json
       eventHandlers:
         - event: CycleStarted(indexed uint256,uint256)
           handler: handleCycleStarted
