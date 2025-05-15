@@ -208,7 +208,9 @@ export function handleAssetClaimed(event: AssetClaimed): void {
     event.block.timestamp
   );
   userPosition.assetAmount = userPosition.assetAmount.plus(amount);
-  userPosition.depositAmount = userPosition.depositAmount.plus(amount);
+  userPosition.depositAmount = userPosition.depositAmount.plus(
+    userRequest.amount
+  );
   userPosition.collateralAmount = userPosition.collateralAmount.plus(
     userRequest.collateralAmount
   );
