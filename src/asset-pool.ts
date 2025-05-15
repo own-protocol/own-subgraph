@@ -31,7 +31,6 @@ function getOrCreateUserPosition(
     userPosition.assetAmount = BigInt.fromI32(0);
     userPosition.depositAmount = BigInt.fromI32(0);
     userPosition.collateralAmount = BigInt.fromI32(0);
-    userPosition.collateralHealth = 3; // Start as healthy
     userPosition.createdAt = timestamp;
     userPosition.updatedAt = timestamp;
   }
@@ -57,14 +56,12 @@ function createUserRequest(
   if (userPosition != null) {
     let requestId = positionId + "-" + requestCycle.toString();
     let userRequest = new UserRequest(requestId);
-    userRequest.userPosition = positionId;
     userRequest.requestType = requestType;
     userRequest.amount = amount;
     userRequest.collateralAmount = collateralAmount;
     userRequest.requestCycle = requestCycle;
     userRequest.createdAt = timestamp;
     userRequest.updatedAt = timestamp;
-    userRequest.status = "PENDING";
 
     if (liquidator) {
       userRequest.liquidator = liquidator;
@@ -131,45 +128,6 @@ function updatePoolData(poolAddress: Address, timestamp: BigInt): void {
   pool.save();
 }
 
-// Helper to update user position health
-function updateUserPositionHealth(
-  userAddress: Address,
-  poolAddress: Address,
-  timestamp: BigInt
-): void {
-  let positionId = userAddress.toHexString() + "-" + poolAddress.toHexString();
-  let userPosition = UserPosition.load(positionId);
-  if (userPosition == null) return;
-
-  let assetPoolContract = AssetPool.bind(poolAddress);
-  let strategyAddress = assetPoolContract.poolStrategy();
-
-  // We would call the strategy contract to get the health, but for simplicity
-  // let's approximate it based on the collateral ratio
-  if (userPosition.assetAmount.isZero()) {
-    userPosition.collateralHealth = 3; // Healthy if no assets
-  } else {
-    // Calculate collateral ratio and set health
-    // This is a simplified approximation - in real implementation, call the strategy contract
-    let collateralRatio = userPosition.collateralAmount
-      .times(BigInt.fromI32(10000))
-      .div(userPosition.assetAmount);
-
-    if (collateralRatio.ge(BigInt.fromI32(2000))) {
-      // 20%
-      userPosition.collateralHealth = 3; // Healthy
-    } else if (collateralRatio.ge(BigInt.fromI32(1250))) {
-      // 12.5%
-      userPosition.collateralHealth = 2; // Warning
-    } else {
-      userPosition.collateralHealth = 1; // Liquidatable
-    }
-  }
-
-  userPosition.updatedAt = timestamp;
-  userPosition.save();
-}
-
 export function handleCollateralDeposited(event: CollateralDeposited): void {
   let userAddress = event.params.user;
   let poolAddress = event.address;
@@ -184,9 +142,6 @@ export function handleCollateralDeposited(event: CollateralDeposited): void {
   userPosition.collateralAmount = userPosition.collateralAmount.plus(amount);
   userPosition.updatedAt = event.block.timestamp;
   userPosition.save();
-
-  // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
@@ -206,9 +161,6 @@ export function handleCollateralWithdrawn(event: CollateralWithdrawn): void {
   userPosition.collateralAmount = userPosition.collateralAmount.minus(amount);
   userPosition.updatedAt = event.block.timestamp;
   userPosition.save();
-
-  // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
 
   // Update pool data
   updatePoolData(poolAddress, event.block.timestamp);
@@ -277,9 +229,6 @@ export function handleAssetClaimed(event: AssetClaimed): void {
   userPosition.updatedAt = event.block.timestamp;
   userPosition.save();
 
-  // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
-
   // Update request status
   let requestId =
     userAddress.toHexString() +
@@ -289,7 +238,6 @@ export function handleAssetClaimed(event: AssetClaimed): void {
     cycle.toString();
   let userRequest = UserRequest.load(requestId);
   if (userRequest != null) {
-    userRequest.status = "COMPLETED";
     userRequest.updatedAt = event.block.timestamp;
     userRequest.save();
   }
@@ -373,9 +321,6 @@ export function handleReserveWithdrawn(event: ReserveWithdrawn): void {
   userPosition.updatedAt = event.block.timestamp;
   userPosition.save();
 
-  // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
-
   // Update request status
   let requestId =
     userAddress.toHexString() +
@@ -385,7 +330,6 @@ export function handleReserveWithdrawn(event: ReserveWithdrawn): void {
     cycle.toString();
   let userRequest = UserRequest.load(requestId);
   if (userRequest != null) {
-    userRequest.status = "COMPLETED";
     userRequest.updatedAt = event.block.timestamp;
     userRequest.save();
   }
@@ -456,9 +400,6 @@ export function handleLiquidationClaimed(event: LiquidationClaimed): void {
   userPosition.updatedAt = event.block.timestamp;
   userPosition.save();
 
-  // Update user position health
-  updateUserPositionHealth(userAddress, poolAddress, event.block.timestamp);
-
   // Find and update liquidation request
   // This is simplified - in reality you'd need to find the right request
   let pool = Pool.load(poolAddress);
@@ -474,7 +415,6 @@ export function handleLiquidationClaimed(event: LiquidationClaimed): void {
   let userRequest = UserRequest.load(requestId);
 
   if (userRequest != null && userRequest.requestType == "LIQUIDATE") {
-    userRequest.status = "COMPLETED";
     userRequest.updatedAt = event.block.timestamp;
     userRequest.save();
   }
@@ -503,7 +443,6 @@ export function handleLiquidationCancelled(event: LiquidationCancelled): void {
   let userRequest = UserRequest.load(requestId);
 
   if (userRequest != null && userRequest.requestType == "LIQUIDATE") {
-    userRequest.status = "CANCELLED";
     userRequest.updatedAt = event.block.timestamp;
     userRequest.save();
   }

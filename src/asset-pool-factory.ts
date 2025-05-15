@@ -7,8 +7,6 @@ import {
 import {
   Pool,
   Oracle,
-  Strategy,
-  Cycle,
   CycleManagerPool,
   LiquidityManagerPool,
 } from "../generated/schema";
@@ -171,23 +169,9 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.cyclePriceLow = BigInt.fromI32(0);
   pool.cycleInterestAmount = BigInt.fromI32(0);
   pool.rebalancedLPs = BigInt.fromI32(0);
+  pool.prevRebalancePrice = BigInt.fromI32(0);
 
   pool.save();
-
-  // Create initial Cycle entity
-  let cycleId = event.params.pool.toHexString() + "-1";
-  let cycle = new Cycle(cycleId);
-  cycle.pool = event.params.pool;
-  cycle.cycleIndex = BigInt.fromI32(1);
-  cycle.state = "POOL_ACTIVE";
-  cycle.startTime = event.block.timestamp;
-  cycle.totalDeposits = BigInt.fromI32(0);
-  cycle.totalRedemptions = BigInt.fromI32(0);
-  cycle.totalAddLiquidity = BigInt.fromI32(0);
-  cycle.totalReduceLiquidity = BigInt.fromI32(0);
-  cycle.lpCount = BigInt.fromI32(0);
-  cycle.rebalancedLPs = BigInt.fromI32(0);
-  cycle.save();
 }
 
 export function handleOwnershipTransferred(
