@@ -5,6 +5,7 @@ import {
   RebalanceInitiated,
   InterestAccrued,
   isPriceDeviationValidUpdated,
+  PoolCycleManager,
 } from "../generated/templates/PoolCycleManager/PoolCycleManager";
 import { PoolLiquidityManager } from "../generated/templates/PoolLiquidityManager/PoolLiquidityManager";
 import { DefaultPoolStrategy } from "../generated/templates/DefaultPoolStrategy/DefaultPoolStrategy";
@@ -64,6 +65,14 @@ export function handleCycleStarted(event: CycleStarted): void {
     if (!utilizationCall.reverted) {
       pool.poolUtilizationRatio = utilizationCall.value;
     }
+  }
+
+  let cycleManagerContract = PoolCycleManager.bind(cycleManagerAddress);
+  let prevRebalancePriceCall = cycleManagerContract.try_cycleRebalancePrice(
+    cycleIndex.minus(BigInt.fromI32(1))
+  );
+  if (!prevRebalancePriceCall.reverted) {
+    pool.prevRebalancePrice = prevRebalancePriceCall.value;
   }
 
   pool.save();
