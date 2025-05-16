@@ -38,6 +38,7 @@ export function handleCycleStarted(event: CycleStarted): void {
   pool.cycleTotalReduceLiquidityAmount = BigInt.fromI32(0);
   pool.rebalancedLPs = BigInt.fromI32(0);
   pool.cycleInterestAmount = BigInt.fromI32(0);
+  pool.cycleState = "POOL_ACTIVE";
   pool.updatedAt = event.block.timestamp;
 
   // Fetch totalLPLiquidityCommited from the liquidity manager
@@ -81,8 +82,7 @@ export function handleCycleStarted(event: CycleStarted): void {
 export function handleRebalanceInitiated(event: RebalanceInitiated): void {
   let cycleManagerAddress = event.address;
   let cycleIndex = event.params.cycleIndex;
-  let cyclePriceHigh = event.params.cyclePriceHigh;
-  let cyclePriceLow = event.params.cyclePriceLow;
+  let cycleState = event.params.cycleState;
 
   let cycleManager = CycleManagerPool.load(cycleManagerAddress);
   if (cycleManager == null) {
@@ -97,9 +97,31 @@ export function handleRebalanceInitiated(event: RebalanceInitiated): void {
     return; // Pool doesn't exist, exit early
   }
 
-  pool.cycleState = "POOL_REBALANCING_ONCHAIN";
-  pool.cyclePriceHigh = cyclePriceHigh;
-  pool.cyclePriceLow = cyclePriceLow;
+  // Map the numeric state to a string
+  pool.cycleState =
+    cycleState == 0
+      ? "POOL_ACTIVE"
+      : cycleState == 1
+        ? "POOL_REBALANCING_OFFCHAIN"
+        : cycleState == 2
+          ? "POOL_REBALANCING_ONCHAIN"
+          : "POOL_HALTED";
+
+  // If state is POOL_REBALANCING_ONCHAIN, fetch high/low prices
+  if (cycleState == 2) {
+    let contract = PoolCycleManager.bind(cycleManagerAddress);
+    let highCall = contract.try_cyclePriceHigh();
+    let lowCall = contract.try_cyclePriceLow();
+
+    if (!highCall.reverted) {
+      pool.cyclePriceHigh = highCall.value;
+    }
+
+    if (!lowCall.reverted) {
+      pool.cyclePriceLow = lowCall.value;
+    }
+  }
+
   pool.updatedAt = event.block.timestamp;
   pool.save();
 }

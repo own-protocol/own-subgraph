@@ -448,16 +448,10 @@
         "internalType": "uint256"
       },
       {
-        "name": "cyclePriceHigh",
-        "type": "uint256",
+        "name": "cycleState",
+        "type": "uint8",
         "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "cyclePriceLow",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
+        "internalType": "enum IPoolCycleManager.CycleState"
       }
     ],
     "anonymous": false
