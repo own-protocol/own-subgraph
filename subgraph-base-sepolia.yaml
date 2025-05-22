@@ -8,9 +8,9 @@ dataSources:
     name: AssetPoolFactory
     network: base-sepolia
     source:
-      address: "0xF225f028F7cd2CbEF1C882224e4ae97AbBd352Dc"
+      address: "0x6eA99f37b4c3ad5B3353cF7CBf7db916fd78ee63"
       abi: AssetPoolFactory
-      startBlock: 24505587
+      startBlock: 26037900
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -46,7 +46,7 @@ dataSources:
     source:
       address: "0xCEaBF7ed92bCA91920316f015C92F61a4F8bE761"
       abi: ProtocolRegistry
-      startBlock: 24504828
+      startBlock: 24504000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
