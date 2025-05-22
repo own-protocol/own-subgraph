@@ -136,7 +136,7 @@ templates:
       eventHandlers:
         - event: CycleStarted(indexed uint256,uint256)
           handler: handleCycleStarted
-        - event: RebalanceInitiated(indexed uint256,uint256,uint256)
+        - event: RebalanceInitiated(indexed uint256,uint8)
           handler: handleRebalanceInitiated
         - event: Rebalanced(indexed address,uint256,uint256,bool,indexed uint256)
           handler: handleRebalanced
