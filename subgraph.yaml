@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: AssetPoolFactory
-    network: {{network}}
+    network: base-sepolia
     source:
-      address: "{{AssetPoolFactory.address}}"
+      address: "0x6eA99f37b4c3ad5B3353cF7CBf7db916fd78ee63"
       abi: AssetPoolFactory
-      startBlock: {{AssetPoolFactory.startBlock}}
+      startBlock: 26037900
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -42,11 +42,11 @@ dataSources:
 
   - kind: ethereum
     name: ProtocolRegistry
-    network: {{network}}
+    network: base-sepolia
     source:
-      address: "{{ProtocolRegistry.address}}"
+      address: "0xCEaBF7ed92bCA91920316f015C92F61a4F8bE761"
       abi: ProtocolRegistry
-      startBlock: {{ProtocolRegistry.startBlock}}
+      startBlock: 24504000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -74,7 +74,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: AssetPool
-    network: {{network}}
+    network: base-sepolia
     source:
       abi: AssetPool
     mapping:
@@ -116,7 +116,7 @@ templates:
 
   - kind: ethereum
     name: PoolCycleManager
-    network: {{network}}
+    network: base-sepolia
     source:
       abi: PoolCycleManager
     mapping:
@@ -148,7 +148,7 @@ templates:
 
   - kind: ethereum
     name: PoolLiquidityManager
-    network: {{network}}
+    network: base-sepolia
     source:
       abi: PoolLiquidityManager
     mapping:
@@ -198,7 +198,7 @@ templates:
 
   - kind: ethereum
     name: XToken
-    network: {{network}}
+    network: base-sepolia
     source:
       abi: XToken
     mapping:
@@ -214,7 +214,7 @@ templates:
 
   - kind: ethereum
     name: AssetOracle
-    network: {{network}}
+    network: base-sepolia
     source:
       abi: AssetOracle
     mapping:
@@ -238,7 +238,7 @@ templates:
 
   - kind: ethereum
     name: ERC20
-    network: {{network}}
+    network: base-sepolia
     source:
       abi: ERC20
     mapping:
@@ -254,7 +254,7 @@ templates:
 
   - kind: ethereum
     name: DefaultPoolStrategy
-    network: {{network}}
+    network: base-sepolia
     source:
       abi: DefaultPoolStrategy
     mapping:

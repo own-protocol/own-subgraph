@@ -19,9 +19,10 @@ yarn-error.log*
 
 # Optional eslint cache
 .eslintcache
-
+ 
 # dotenv environment variables file
 .env
+.prettierignore
 
 # Testing
 coverage
