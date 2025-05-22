@@ -147,6 +147,7 @@ export function handleRebalanced(event: Rebalanced): void {
   if (lpPosition != null) {
     lpPosition.lastRebalanceCycle = cycleIndex;
     lpPosition.lastRebalancePrice = rebalancePrice;
+    lpPosition.save();
   }
 
   // Update pool data
