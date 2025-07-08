@@ -138,6 +138,13 @@
   },
   {
     "type": "function",
+    "name": "setSplitDetected",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "sourceHash",
     "inputs": [],
     "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
@@ -374,11 +381,18 @@
         "internalType": "uint256"
       },
       {
-        "name": "newPrice",
+        "name": "timestamp",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
-      },
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SplitDetectionReset",
+    "inputs": [
       {
         "name": "timestamp",
         "type": "uint256",

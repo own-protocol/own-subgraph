@@ -46,6 +46,13 @@
   },
   {
     "type": "function",
+    "name": "cumulativeInterestIndex",
+    "inputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "cycleIndex",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
@@ -67,13 +74,6 @@
   },
   {
     "type": "function",
-    "name": "cyclePoolInterest",
-    "inputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "cyclePriceHigh",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
@@ -84,6 +84,13 @@
     "name": "cyclePriceLow",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "cycleRebalanceAmount",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "int256", "internalType": "int256" }],
     "stateMutability": "view"
   },
   {
@@ -217,6 +224,17 @@
   },
   {
     "type": "function",
+    "name": "multicall",
+    "inputs": [
+      { "name": "data", "type": "bytes[]", "internalType": "bytes[]" }
+    ],
+    "outputs": [
+      { "name": "results", "type": "bytes[]", "internalType": "bytes[]" }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "owner",
     "inputs": [],
     "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
@@ -237,6 +255,13 @@
   },
   {
     "type": "function",
+    "name": "poolHaltAmount",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "poolLiquidityManager",
     "inputs": [],
     "outputs": [
@@ -246,6 +271,13 @@
         "internalType": "contract IPoolLiquidityManager"
       }
     ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "poolSplitIndex",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
   },
   {
@@ -265,6 +297,21 @@
     "type": "function",
     "name": "rebalanceLP",
     "inputs": [{ "name": "lp", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "rebalancePool",
+    "inputs": [
+      { "name": "lp", "type": "address", "internalType": "address" },
+      {
+        "name": "rebalancePrice",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      { "name": "haltPool", "type": "bool", "internalType": "bool" }
+    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -329,6 +376,13 @@
   },
   {
     "type": "function",
+    "name": "splitMultiplier",
+    "inputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "transferOwnership",
     "inputs": [
       { "name": "newOwner", "type": "address", "internalType": "address" }
@@ -374,12 +428,6 @@
     "inputs": [
       {
         "name": "interestAccrued",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "cumulativeInterest",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -506,7 +554,15 @@
     ],
     "anonymous": false
   },
+  {
+    "type": "error",
+    "name": "AddressEmptyCode",
+    "inputs": [
+      { "name": "target", "type": "address", "internalType": "address" }
+    ]
+  },
   { "type": "error", "name": "AlreadyRebalanced", "inputs": [] },
+  { "type": "error", "name": "FailedCall", "inputs": [] },
   { "type": "error", "name": "InsufficientLPCollateral", "inputs": [] },
   { "type": "error", "name": "InsufficientLPLiquidity", "inputs": [] },
   { "type": "error", "name": "InvalidCycleRequest", "inputs": [] },
@@ -539,6 +595,13 @@
   { "type": "error", "name": "PriceDeviationHigh", "inputs": [] },
   { "type": "error", "name": "RebalanceMismatch", "inputs": [] },
   { "type": "error", "name": "RebalancingExpired", "inputs": [] },
+  {
+    "type": "error",
+    "name": "SafeERC20FailedOperation",
+    "inputs": [
+      { "name": "token", "type": "address", "internalType": "address" }
+    ]
+  },
   { "type": "error", "name": "UnauthorizedCaller", "inputs": [] },
   { "type": "error", "name": "ZeroAddress", "inputs": [] }
 ]
