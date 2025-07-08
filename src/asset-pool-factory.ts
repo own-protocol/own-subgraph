@@ -156,7 +156,7 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.totalUserCollateral = BigInt.fromI32(0);
   pool.cycleTotalDeposits = BigInt.fromI32(0);
   pool.cycleTotalRedemptions = BigInt.fromI32(0);
-  pool.reserveYieldAccrued = BigInt.fromI32(0);
+  pool.reserveYieldIndex = BigInt.fromI32(0);
   pool.totalLPLiquidityCommited = BigInt.fromI32(0);
   pool.totalLPCollateral = BigInt.fromI32(0);
   pool.lpCount = BigInt.fromI32(0);

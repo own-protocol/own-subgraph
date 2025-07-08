@@ -74,7 +74,7 @@ function updatePoolData(poolAddress: Address, timestamp: BigInt): void {
   let aggregatePoolReservesCall = assetPoolContract.try_aggregatePoolReserves();
   let cycleTotalDepositsCall = assetPoolContract.try_cycleTotalDeposits();
   let cycleTotalRedemptionsCall = assetPoolContract.try_cycleTotalRedemptions();
-  let reserveYieldAccruedCall = assetPoolContract.try_reserveYieldAccrued();
+  let reserveYieldIndexCall = assetPoolContract.try_reserveYieldIndex();
 
   if (!totalUserDepositsCall.reverted) {
     pool.totalUserDeposits = totalUserDepositsCall.value;
@@ -100,8 +100,8 @@ function updatePoolData(poolAddress: Address, timestamp: BigInt): void {
     pool.cycleTotalRedemptions = cycleTotalRedemptionsCall.value;
   }
 
-  if (!reserveYieldAccruedCall.reverted) {
-    pool.reserveYieldAccrued = reserveYieldAccruedCall.value;
+  if (!reserveYieldIndexCall.reverted) {
+    pool.reserveYieldIndex = reserveYieldIndexCall.value;
   }
 
   // Update asset supply

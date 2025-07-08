@@ -15,6 +15,7 @@ import {
   InterestDistributedToLP,
   RebalanceAmountTransferred,
   FeeDeducted,
+  DelegateSet,
 } from "../generated/templates/PoolLiquidityManager/PoolLiquidityManager";
 import {
   Pool,
@@ -37,6 +38,9 @@ function getOrCreateLPPosition(
     lpPosition = new LPPosition(id);
     lpPosition.lp = lpAddress;
     lpPosition.pool = poolAddress;
+    lpPosition.delegateAddress = Address.fromString(
+      "0x0000000000000000000000000000000000000000"
+    ); // Default to zero address
     lpPosition.liquidityCommitment = BigInt.fromI32(0);
     lpPosition.collateralAmount = BigInt.fromI32(0);
     lpPosition.interestAccrued = BigInt.fromI32(0);
@@ -116,6 +120,29 @@ export function handleInterestClaimed(event: InterestClaimed): void {
     event.block.timestamp
   );
   lpPosition.interestAccrued = BigInt.fromI32(0); // Reset after claiming
+  lpPosition.updatedAt = event.block.timestamp;
+  lpPosition.save();
+}
+
+export function handleDelegateSet(event: DelegateSet): void {
+  let lpAddress = event.params.lp;
+  let liquidityManagerAddress = event.address;
+  let delegateAddress = event.params.delegate;
+
+  let liquidityManager = LiquidityManagerPool.load(liquidityManagerAddress);
+  if (liquidityManager == null) {
+    return; // Mapping doesn't exist, exit early
+  }
+
+  let poolAddress = Address.fromBytes(liquidityManager.pool);
+
+  // Get or create LP position
+  let lpPosition = getOrCreateLPPosition(
+    lpAddress,
+    poolAddress,
+    event.block.timestamp
+  );
+  lpPosition.delegateAddress = delegateAddress;
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
 }
@@ -438,7 +465,7 @@ export function handleRebalanceAmountTransferred(
 }
 
 export function handleFeeDeducted(event: FeeDeducted): void {
-  let userAddress = event.params.user;
+  let lpAddress = event.params.lp;
   let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
 
@@ -454,7 +481,7 @@ export function handleFeeDeducted(event: FeeDeducted): void {
     event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
   let feeEvent = new FeeEvent(id);
   feeEvent.pool = poolAddress;
-  feeEvent.user = userAddress;
+  feeEvent.user = lpAddress;
   feeEvent.amount = amount;
   feeEvent.timestamp = event.block.timestamp;
   feeEvent.transactionHash = event.transaction.hash;

@@ -141,13 +141,6 @@
   },
   {
     "type": "function",
-    "name": "getLPCount",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "getLPCycleAssetShare",
     "inputs": [
       { "name": "lp", "type": "address", "internalType": "address" },
@@ -165,13 +158,6 @@
     "name": "getLPCycleAssetShare",
     "inputs": [{ "name": "lp", "type": "address", "internalType": "address" }],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getLPLiquidationIntiator",
-    "inputs": [{ "name": "lp", "type": "address", "internalType": "address" }],
-    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
@@ -274,7 +260,14 @@
   {
     "type": "function",
     "name": "isLP",
-    "inputs": [{ "name": "lp", "type": "address", "internalType": "address" }],
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isLPActive",
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
     "stateMutability": "view"
   },
@@ -304,6 +297,13 @@
     "name": "lpCount",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "lpDelegates",
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
@@ -365,10 +365,13 @@
   },
   {
     "type": "function",
-    "name": "registeredLPs",
-    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
-    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
-    "stateMutability": "view"
+    "name": "registerLP",
+    "inputs": [
+      { "name": "amount", "type": "uint256", "internalType": "uint256" },
+      { "name": "delegate", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -392,7 +395,7 @@
   },
   {
     "type": "function",
-    "name": "reserveYieldAccrued",
+    "name": "reserveYieldIndex",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
@@ -406,10 +409,12 @@
   },
   {
     "type": "function",
-    "name": "scaledReserveBalance",
-    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
+    "name": "setDelegate",
+    "inputs": [
+      { "name": "delegate", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -472,10 +477,29 @@
   },
   {
     "type": "event",
+    "name": "DelegateSet",
+    "inputs": [
+      {
+        "name": "lp",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "delegate",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "FeeDeducted",
     "inputs": [
       {
-        "name": "user",
+        "name": "lp",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -766,6 +790,7 @@
     ],
     "anonymous": false
   },
+  { "type": "error", "name": "BetterLiquidationRequestExists", "inputs": [] },
   { "type": "error", "name": "InsufficientCollateral", "inputs": [] },
   {
     "type": "error",
@@ -796,6 +821,13 @@
   },
   { "type": "error", "name": "ReentrancyGuardReentrantCall", "inputs": [] },
   { "type": "error", "name": "RequestPending", "inputs": [] },
+  {
+    "type": "error",
+    "name": "SafeERC20FailedOperation",
+    "inputs": [
+      { "name": "token", "type": "address", "internalType": "address" }
+    ]
+  },
   { "type": "error", "name": "Unauthorized", "inputs": [] },
   { "type": "error", "name": "UtilizationTooHighForOperation", "inputs": [] },
   { "type": "error", "name": "ZeroAddress", "inputs": [] },

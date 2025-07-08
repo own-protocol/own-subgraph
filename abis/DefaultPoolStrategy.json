@@ -123,6 +123,23 @@
   },
   {
     "type": "function",
+    "name": "calculatePostSplitAmount",
+    "inputs": [
+      { "name": "assetPool", "type": "address", "internalType": "address" },
+      { "name": "user", "type": "address", "internalType": "address" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [
+      {
+        "name": "postSplitAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "calculateUserRequiredCollateral",
     "inputs": [
       { "name": "assetPool", "type": "address", "internalType": "address" },
@@ -161,11 +178,6 @@
       },
       {
         "name": "oracleThreshold",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "poolHaltThreshold",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -211,11 +223,6 @@
         "internalType": "uint256"
       },
       {
-        "name": "baseCollateralRatio",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
         "name": "liquidationReward",
         "type": "uint256",
         "internalType": "uint256"
@@ -249,6 +256,27 @@
   },
   {
     "type": "function",
+    "name": "haltFeePercent",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "haltLiquidityPercent",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "haltRequestThreshold",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "haltThreshold",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
@@ -270,13 +298,6 @@
   },
   {
     "type": "function",
-    "name": "lpBaseCollateralRatio",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "lpHealthyCollateralRatio",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
@@ -292,6 +313,13 @@
   {
     "type": "function",
     "name": "lpLiquidationThreshold",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "lpMinCommitment",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
@@ -351,8 +379,35 @@
         "name": "_oracleUpdateThreshold",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setHaltParams",
+    "inputs": [
+      {
+        "name": "_haltThreshold",
+        "type": "uint256",
+        "internalType": "uint256"
       },
-      { "name": "_haltThreshold", "type": "uint256", "internalType": "uint256" }
+      {
+        "name": "_haltLiquidityPercent",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_haltFeePercent",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_haltRequestThreshold",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -387,12 +442,12 @@
         "type": "uint256",
         "internalType": "uint256"
       },
-      { "name": "baseRatio", "type": "uint256", "internalType": "uint256" },
       {
         "name": "liquidationReward",
         "type": "uint256",
         "internalType": "uint256"
-      }
+      },
+      { "name": "minCommitment", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -473,12 +528,6 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
-      },
-      {
-        "name": "poolHaltThreshold",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
       }
     ],
     "anonymous": false
@@ -498,6 +547,37 @@
         "type": "address",
         "indexed": false,
         "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "HaltParamsUpdated",
+    "inputs": [
+      {
+        "name": "haltThreshold",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "haltLiquidityPercent",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "haltFeePercent",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "haltRequestThreshold",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       }
     ],
     "anonymous": false
@@ -569,13 +649,13 @@
         "internalType": "uint256"
       },
       {
-        "name": "baseRatio",
+        "name": "liquidationReward",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
       },
       {
-        "name": "liquidationReward",
+        "name": "minCommitment",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"

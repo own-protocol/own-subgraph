@@ -26,7 +26,7 @@ type Pool @entity(immutable: false) {
   totalUserCollateral: BigInt
   cycleTotalDeposits: BigInt
   cycleTotalRedemptions: BigInt
-  reserveYieldAccrued: BigInt
+  reserveYieldIndex: BigInt
 
   # Liquidity Manager Data
   totalLPLiquidityCommited: BigInt!
@@ -87,13 +87,17 @@ type Strategy @entity(immutable: false) {
   userLiquidationThreshold: BigInt
   lpHealthyCollateralRatio: BigInt
   lpLiquidationThreshold: BigInt
-  lpBaseCollateralRatio: BigInt
   lpLiquidationReward: BigInt
 
   # Cycle parameters
   rebalanceLength: BigInt
   oracleUpdateThreshold: BigInt
+
+  #Halt parameters
   haltThreshold: BigInt
+  haltLiquidityPercent: BigInt
+  haltFeePercent: BigInt
+  haltRequestThreshold: BigInt
 
   createdAt: BigInt!
   updatedAt: BigInt!
@@ -134,7 +138,7 @@ type LPPosition @entity(immutable: false) {
   liquidityCommitment: BigInt!
   collateralAmount: BigInt!
   interestAccrued: BigInt!
-
+  delegateAddress: Bytes # address of the delegate that manages the LP rebalance
   # Health metrics
   liquidityHealth: Int # 3 = Healthy, 2 = Warning, 1 = Liquidatable
   # LP analytics

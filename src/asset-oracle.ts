@@ -44,7 +44,6 @@ export function handleSplitDetected(event: SplitDetected): void {
     // Update split detection data
     oracle.splitDetected = true;
     oracle.preSplitPrice = event.params.prevPrice;
-    oracle.assetPrice = event.params.newPrice;
     oracle.lastUpdated = event.params.timestamp;
     oracle.updatedAt = event.block.timestamp;
     oracle.save();

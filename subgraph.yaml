@@ -8,9 +8,9 @@ dataSources:
     name: AssetPoolFactory
     network: base-sepolia
     source:
-      address: "0x6eA99f37b4c3ad5B3353cF7CBf7db916fd78ee63"
+      address: "0x59409659e34158244AF69c3E3aE15Ded8bA941A4"
       abi: AssetPoolFactory
-      startBlock: 26037900
+      startBlock: 28062900
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -44,9 +44,9 @@ dataSources:
     name: ProtocolRegistry
     network: base-sepolia
     source:
-      address: "0xCEaBF7ed92bCA91920316f015C92F61a4F8bE761"
+      address: "0x811Ad5f758DB53d8dD3B18890a0cfe5a389e3C72"
       abi: ProtocolRegistry
-      startBlock: 24504000
+      startBlock: 28062300
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -140,7 +140,7 @@ templates:
           handler: handleRebalanceInitiated
         - event: Rebalanced(indexed address,uint256,uint256,bool,indexed uint256)
           handler: handleRebalanced
-        - event: InterestAccrued(uint256,uint256,uint256)
+        - event: InterestAccrued(uint256,uint256)
           handler: handleInterestAccrued
         - event: isPriceDeviationValidUpdated(bool)
           handler: handleIsPriceDeviationValidUpdated
@@ -194,6 +194,8 @@ templates:
           handler: handleRebalanceAmountTransferred
         - event: FeeDeducted(indexed address,uint256)
           handler: handleFeeDeducted
+        - event: DelegateSet(indexed address,indexed address)
+          handler: handleDelegateSet
       file: ./src/pool-liquidity-manager.ts
 
   - kind: ethereum
@@ -232,7 +234,7 @@ templates:
           handler: handleAssetPriceUpdated
         - event: OHLCDataUpdated(uint256,uint256,uint256,uint256,uint256)
           handler: handleOHLCDataUpdated
-        - event: SplitDetected(uint256,uint256,uint256)
+        - event: SplitDetected(uint256,uint256)
           handler: handleSplitDetected
       file: ./src/asset-oracle.ts
 
@@ -273,8 +275,10 @@ templates:
           handler: handleUserCollateralParamsUpdated
         - event: LPLiquidityParamsUpdated(uint256,uint256,uint256,uint256)
           handler: handleLPLiquidityParamsUpdated
-        - event: CycleParamsUpdated(uint256,uint256,uint256)
+        - event: CycleParamsUpdated(uint256,uint256)
           handler: handleCycleParamsUpdated
+        - event: HaltParamsUpdated(uint256,uint256,uint256,uint256)
+          handler: handleHaltParamsUpdated
         - event: FeeParamsUpdated(uint256,address)
           handler: handleFeeParamsUpdated
         - event: IsYieldBearingUpdated(bool)
