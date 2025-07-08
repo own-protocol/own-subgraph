@@ -438,7 +438,7 @@ export function handleRebalanceAmountTransferred(
 }
 
 export function handleFeeDeducted(event: FeeDeducted): void {
-  let userAddress = event.params.user;
+  let lpAddress = event.params.lp;
   let liquidityManagerAddress = event.address;
   let amount = event.params.amount;
 
@@ -454,7 +454,7 @@ export function handleFeeDeducted(event: FeeDeducted): void {
     event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
   let feeEvent = new FeeEvent(id);
   feeEvent.pool = poolAddress;
-  feeEvent.user = userAddress;
+  feeEvent.user = lpAddress;
   feeEvent.amount = amount;
   feeEvent.timestamp = event.block.timestamp;
   feeEvent.transactionHash = event.transaction.hash;
