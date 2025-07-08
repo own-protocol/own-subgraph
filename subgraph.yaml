@@ -194,6 +194,8 @@ templates:
           handler: handleRebalanceAmountTransferred
         - event: FeeDeducted(indexed address,uint256)
           handler: handleFeeDeducted
+        - event: DelegateSet(indexed address,indexed address)
+          handler: handleDelegateSet
       file: ./src/pool-liquidity-manager.ts
 
   - kind: ethereum
