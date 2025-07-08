@@ -87,13 +87,17 @@ type Strategy @entity(immutable: false) {
   userLiquidationThreshold: BigInt
   lpHealthyCollateralRatio: BigInt
   lpLiquidationThreshold: BigInt
-  lpBaseCollateralRatio: BigInt
   lpLiquidationReward: BigInt
 
   # Cycle parameters
   rebalanceLength: BigInt
   oracleUpdateThreshold: BigInt
+
+  #Halt parameters
   haltThreshold: BigInt
+  haltLiquidityPercent: BigInt
+  haltFeePercent: BigInt
+  haltRequestThreshold: BigInt
 
   createdAt: BigInt!
   updatedAt: BigInt!

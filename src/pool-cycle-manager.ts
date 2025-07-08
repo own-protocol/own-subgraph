@@ -165,7 +165,6 @@ export function handleRebalanced(event: Rebalanced): void {
 export function handleInterestAccrued(event: InterestAccrued): void {
   let cycleManagerAddress = event.address;
   let interestAccrued = event.params.interestAccrued;
-  let cumulativeInterest = event.params.cumulativeInterest;
   let timestamp = event.params.timestamp;
 
   let cycleManager = CycleManagerPool.load(cycleManagerAddress);
@@ -181,6 +180,7 @@ export function handleInterestAccrued(event: InterestAccrued): void {
     return; // Pool doesn't exist, exit early
   }
 
+  // Todo: this needs to be updated to handle interest accrued correctly
   pool.cycleInterestAmount = interestAccrued;
   pool.updatedAt = event.block.timestamp;
   pool.save();

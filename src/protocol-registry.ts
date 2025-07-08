@@ -66,11 +66,13 @@ export function handleStrategyVerificationUpdated(
     strategy.userLiquidationThreshold = BigInt.fromI32(0);
     strategy.lpHealthyCollateralRatio = BigInt.fromI32(0);
     strategy.lpLiquidationThreshold = BigInt.fromI32(0);
-    strategy.lpBaseCollateralRatio = BigInt.fromI32(0);
     strategy.lpLiquidationReward = BigInt.fromI32(0);
     strategy.rebalanceLength = BigInt.fromI32(0);
     strategy.oracleUpdateThreshold = BigInt.fromI32(0);
     strategy.haltThreshold = BigInt.fromI32(0);
+    strategy.haltLiquidityPercent = BigInt.fromI32(0);
+    strategy.haltFeePercent = BigInt.fromI32(0);
+    strategy.haltRequestThreshold = BigInt.fromI32(0);
 
     // Fetch all strategy data from contract
     let strategyContract = DefaultPoolStrategy.bind(strategyAddress);
@@ -91,7 +93,24 @@ export function handleStrategyVerificationUpdated(
       strategy.rebalanceLength = cycleParamsCall.value.getRebalancePeriod();
       strategy.oracleUpdateThreshold =
         cycleParamsCall.value.getOracleThreshold();
-      strategy.haltThreshold = cycleParamsCall.value.getPoolHaltThreshold();
+    }
+
+    // Get halt parameters
+    let haltThreshold = strategyContract.try_haltThreshold();
+    if (!haltThreshold.reverted) {
+      strategy.haltThreshold = haltThreshold.value;
+    }
+    let haltLiquidityPercent = strategyContract.try_haltLiquidityPercent();
+    if (!haltLiquidityPercent.reverted) {
+      strategy.haltLiquidityPercent = haltLiquidityPercent.value;
+    }
+    let haltFeePercent = strategyContract.try_haltFeePercent();
+    if (!haltFeePercent.reverted) {
+      strategy.haltFeePercent = haltFeePercent.value;
+    }
+    let haltRequestThreshold = strategyContract.try_haltRequestThreshold();
+    if (!haltRequestThreshold.reverted) {
+      strategy.haltRequestThreshold = haltRequestThreshold.value;
     }
 
     // Get user collateral parameters
@@ -111,8 +130,6 @@ export function handleStrategyVerificationUpdated(
         lpLiquidityParamsCall.value.getHealthyRatio();
       strategy.lpLiquidationThreshold =
         lpLiquidityParamsCall.value.getLiquidationThreshold();
-      strategy.lpBaseCollateralRatio =
-        lpLiquidityParamsCall.value.getBaseCollateralRatio();
       strategy.lpLiquidationReward =
         lpLiquidityParamsCall.value.getLiquidationReward();
     }

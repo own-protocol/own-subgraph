@@ -6,6 +6,7 @@ import {
   CycleParamsUpdated,
   FeeParamsUpdated,
   IsYieldBearingUpdated,
+  HaltParamsUpdated,
 } from "../generated/templates/DefaultPoolStrategy/DefaultPoolStrategy";
 import { Strategy } from "../generated/schema";
 
@@ -49,7 +50,6 @@ export function handleLPLiquidityParamsUpdated(
   if (strategy) {
     strategy.lpHealthyCollateralRatio = event.params.healthyRatio;
     strategy.lpLiquidationThreshold = event.params.liquidationThreshold;
-    strategy.lpBaseCollateralRatio = event.params.baseRatio;
     strategy.lpLiquidationReward = event.params.liquidationReward;
     strategy.updatedAt = event.block.timestamp;
     strategy.save();
@@ -63,7 +63,20 @@ export function handleCycleParamsUpdated(event: CycleParamsUpdated): void {
   if (strategy) {
     strategy.rebalanceLength = event.params.rebalancePeriod;
     strategy.oracleUpdateThreshold = event.params.oracleUpdateThreshold;
-    strategy.haltThreshold = event.params.poolHaltThreshold;
+    strategy.updatedAt = event.block.timestamp;
+    strategy.save();
+  }
+}
+
+export function handleHaltParamsUpdated(event: HaltParamsUpdated): void {
+  let strategyAddress = event.address;
+  let strategy = Strategy.load(strategyAddress);
+
+  if (strategy) {
+    strategy.haltThreshold = event.params.haltThreshold;
+    strategy.haltLiquidityPercent = event.params.haltLiquidityPercent;
+    strategy.haltFeePercent = event.params.haltFeePercent;
+    strategy.haltRequestThreshold = event.params.haltRequestThreshold;
     strategy.updatedAt = event.block.timestamp;
     strategy.save();
   }

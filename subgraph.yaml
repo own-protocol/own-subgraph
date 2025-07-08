@@ -140,7 +140,7 @@ templates:
           handler: handleRebalanceInitiated
         - event: Rebalanced(indexed address,uint256,uint256,bool,indexed uint256)
           handler: handleRebalanced
-        - event: InterestAccrued(uint256,uint256,uint256)
+        - event: InterestAccrued(uint256,uint256)
           handler: handleInterestAccrued
         - event: isPriceDeviationValidUpdated(bool)
           handler: handleIsPriceDeviationValidUpdated
@@ -232,7 +232,7 @@ templates:
           handler: handleAssetPriceUpdated
         - event: OHLCDataUpdated(uint256,uint256,uint256,uint256,uint256)
           handler: handleOHLCDataUpdated
-        - event: SplitDetected(uint256,uint256,uint256)
+        - event: SplitDetected(uint256,uint256)
           handler: handleSplitDetected
       file: ./src/asset-oracle.ts
 
@@ -273,8 +273,10 @@ templates:
           handler: handleUserCollateralParamsUpdated
         - event: LPLiquidityParamsUpdated(uint256,uint256,uint256,uint256)
           handler: handleLPLiquidityParamsUpdated
-        - event: CycleParamsUpdated(uint256,uint256,uint256)
+        - event: CycleParamsUpdated(uint256,uint256)
           handler: handleCycleParamsUpdated
+        - event: HaltParamsUpdated(uint256,uint256,uint256,uint256)
+          handler: handleHaltParamsUpdated
         - event: FeeParamsUpdated(uint256,address)
           handler: handleFeeParamsUpdated
         - event: IsYieldBearingUpdated(bool)
