@@ -144,49 +144,37 @@ export function handleRebalanced(event: Rebalanced): void {
   // Load LP position
   let id = lpAddress.toHexString() + "-" + poolAddress.toHexString();
   let lpPosition = LPPosition.load(id);
-
-  if (lpPosition != null) {
-    lpPosition.lastRebalanceCycle = cycleIndex;
-    lpPosition.lastRebalancePrice = rebalancePrice;
-    lpPosition.save();
-  }
-
-  // Load and Update pool data
   let pool = Pool.load(poolAddress);
+
   if (pool == null) {
     return; // Pool doesn't exist, exit early
   }
 
-  // Update rebalance-related info
-  if (lpPosition !== null) {
+  // Only proceed if LP position exists
+  if (lpPosition != null) {
+    // Update rebalance-related info
     lpPosition.lastRebalanceCycle = cycleIndex;
     lpPosition.lastRebalancePrice = rebalancePrice;
-  }
 
-  // Fetch LP Health using strategy contract
-  let strategyAddress = pool.poolStrategy;
-  let liquidityManagerAddress = pool.poolLiquidityManager;
+    // Fetch LP Health using strategy contract
+    let strategyAddress = Address.fromBytes(pool.poolStrategy);
+    let liquidityManagerAddress = Address.fromBytes(pool.poolLiquidityManager);
+    let strategyContract = DefaultPoolStrategy.bind(strategyAddress);
 
-  let strategyContract = DefaultPoolStrategy.bind(
-    Address.fromBytes(strategyAddress)
-  );
+    let lpHealthResult = strategyContract.try_getLPLiquidityHealth(
+      liquidityManagerAddress,
+      lpAddress
+    );
 
-  let lpHealthResult = strategyContract.try_getLPLiquidityHealth(
-    Address.fromBytes(liquidityManagerAddress),
-    lpAddress
-  );
+    if (!lpHealthResult.reverted) {
+      lpPosition.liquidityHealth = lpHealthResult.value;
+    }
 
-  if (!lpHealthResult.reverted && lpPosition !== null) {
-    lpPosition.liquidityHealth = lpHealthResult.value;
-    lpPosition.updatedAt = event.block.timestamp;
-    lpPosition.save();
-  } else if (lpPosition !== null) {
-    // Still save rebalance info even if health fetch failed
     lpPosition.updatedAt = event.block.timestamp;
     lpPosition.save();
   }
 
-  // Update pool rebalance stats | Increment rebalancedLPs
+  // Update pool rebalanced count | Increment rebalancedLPs
   pool.rebalancedLPs = pool.rebalancedLPs.plus(BigInt.fromI32(1));
   pool.updatedAt = event.block.timestamp;
   pool.save();
