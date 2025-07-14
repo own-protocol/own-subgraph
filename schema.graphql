@@ -146,6 +146,8 @@ type LPPosition @entity(immutable: false) {
   lastRebalanceCycle: BigInt!
   lastRebalancePrice: BigInt!
 
+  isLPActive: Boolean!
+
   createdAt: BigInt!
   updatedAt: BigInt!
 }

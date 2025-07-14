@@ -167,6 +167,9 @@ export function handleLPAdded(event: LPAdded): void {
   );
   lpPosition.collateralAmount = collateral;
   lpPosition.updatedAt = event.block.timestamp;
+
+  // lpPosition.isLPActive = true; // ✅ Set active
+
   lpPosition.save();
 
   // Update pool LP count
