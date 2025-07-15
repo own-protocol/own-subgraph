@@ -170,6 +170,9 @@ export function handleRebalanced(event: Rebalanced): void {
       lpPosition.liquidityHealth = lpHealthResult.value;
     }
 
+    //Mark LP as active
+    lpPosition.isLPActive = true;
+
     lpPosition.updatedAt = event.block.timestamp;
     lpPosition.save();
   }
