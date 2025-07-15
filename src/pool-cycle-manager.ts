@@ -141,22 +141,40 @@ export function handleRebalanced(event: Rebalanced): void {
 
   let poolAddress = Address.fromBytes(cycleManager.pool);
 
+  // Load LP position
   let id = lpAddress.toHexString() + "-" + poolAddress.toHexString();
   let lpPosition = LPPosition.load(id);
-
-  if (lpPosition != null) {
-    lpPosition.lastRebalanceCycle = cycleIndex;
-    lpPosition.lastRebalancePrice = rebalancePrice;
-    lpPosition.save();
-  }
-
-  // Update pool data
   let pool = Pool.load(poolAddress);
+
   if (pool == null) {
     return; // Pool doesn't exist, exit early
   }
 
-  // Increment rebalancedLPs
+  // Only proceed if LP position exists
+  if (lpPosition != null) {
+    // Update rebalance-related info here
+    lpPosition.lastRebalanceCycle = cycleIndex;
+    lpPosition.lastRebalancePrice = rebalancePrice;
+
+    // Fetch LP Health using strategy contract
+    let strategyAddress = Address.fromBytes(pool.poolStrategy);
+    let liquidityManagerAddress = Address.fromBytes(pool.poolLiquidityManager);
+    let strategyContract = DefaultPoolStrategy.bind(strategyAddress);
+
+    let lpHealthResult = strategyContract.try_getLPLiquidityHealth(
+      liquidityManagerAddress,
+      lpAddress
+    );
+
+    if (!lpHealthResult.reverted) {
+      lpPosition.liquidityHealth = lpHealthResult.value;
+    }
+
+    lpPosition.updatedAt = event.block.timestamp;
+    lpPosition.save();
+  }
+
+  // Update pool rebalanced count | Increment rebalancedLPs
   pool.rebalancedLPs = pool.rebalancedLPs.plus(BigInt.fromI32(1));
   pool.updatedAt = event.block.timestamp;
   pool.save();
