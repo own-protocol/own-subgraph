@@ -170,8 +170,12 @@ export function handleRebalanced(event: Rebalanced): void {
       lpPosition.liquidityHealth = lpHealthResult.value;
     }
 
-    //Mark LP as active
-    lpPosition.isLPActive = true;
+    // Determine LP active status based on current liquidity
+    if (lpPosition.liquidityCommitment.gt(BigInt.zero())) {
+      lpPosition.isLPActive = true;
+    } else {
+      lpPosition.isLPActive = false;
+    }
 
     lpPosition.updatedAt = event.block.timestamp;
     lpPosition.save();
