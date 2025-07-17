@@ -150,6 +150,9 @@ export function handleRebalanced(event: Rebalanced): void {
     return; // Pool doesn't exist, exit early
   }
 
+  let liquidityManagerAddress = Address.fromBytes(pool.poolLiquidityManager);
+  let liquidityManager = PoolLiquidityManager.bind(liquidityManagerAddress);
+
   // Only proceed if LP position exists
   if (lpPosition != null) {
     // Update rebalance-related info here
@@ -168,6 +171,11 @@ export function handleRebalanced(event: Rebalanced): void {
 
     if (!lpHealthResult.reverted) {
       lpPosition.liquidityHealth = lpHealthResult.value;
+    }
+
+    let isLPActiveResult = liquidityManager.try_isLPActive(lpAddress);
+    if (!isLPActiveResult.reverted) {
+      lpPosition.isLPActive = isLPActiveResult.value;
     }
 
     lpPosition.updatedAt = event.block.timestamp;

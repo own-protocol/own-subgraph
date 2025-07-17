@@ -166,6 +166,7 @@ export function handleLPAdded(event: LPAdded): void {
     event.block.timestamp
   );
   lpPosition.collateralAmount = collateral;
+  lpPosition.isLPActive = true;
   lpPosition.updatedAt = event.block.timestamp;
   lpPosition.save();
 
