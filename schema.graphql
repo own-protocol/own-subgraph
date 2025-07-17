@@ -135,6 +135,7 @@ type LPPosition @entity(immutable: false) {
   id: ID! # lp address + pool address
   lp: Bytes! # lp address
   pool: Pool!
+  isLPActive: Boolean!
   liquidityCommitment: BigInt!
   collateralAmount: BigInt!
   interestAccrued: BigInt!
@@ -145,9 +146,6 @@ type LPPosition @entity(immutable: false) {
   assetShare: BigInt!
   lastRebalanceCycle: BigInt!
   lastRebalancePrice: BigInt!
-
-  isLPActive: Boolean!
-
   createdAt: BigInt!
   updatedAt: BigInt!
 }
