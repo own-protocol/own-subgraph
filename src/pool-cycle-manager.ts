@@ -38,8 +38,22 @@ export function handleCycleStarted(event: CycleStarted): void {
   pool.cycleTotalReduceLiquidityAmount = BigInt.fromI32(0);
   pool.rebalancedLPs = BigInt.fromI32(0);
   pool.cycleInterestAmount = BigInt.fromI32(0);
-  pool.cycleState = "POOL_ACTIVE";
   pool.updatedAt = event.block.timestamp;
+
+  let poolCycleManager = PoolCycleManager.bind(cycleManagerAddress);
+  let cycleStateCall = poolCycleManager.try_cycleState();
+  if (!cycleStateCall.reverted) {
+    let cycleState = cycleStateCall.value;
+    // Map the numeric state to a string
+    pool.cycleState =
+      cycleState == 0
+        ? "POOL_ACTIVE"
+        : cycleState == 1
+          ? "POOL_REBALANCING_OFFCHAIN"
+          : cycleState == 2
+            ? "POOL_REBALANCING_ONCHAIN"
+            : "POOL_HALTED";
+  }
 
   // Fetch totalLPLiquidityCommited from the liquidity manager
   if (pool.poolLiquidityManager) {
