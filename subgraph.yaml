@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: AssetPoolFactory
-    network: base-sepolia
+    network: base
     source:
-      address: "0x59409659e34158244AF69c3E3aE15Ded8bA941A4"
+      address: "0x7dFC74B1dAfd918D66B35E5237C7A5b170710386"
       abi: AssetPoolFactory
-      startBlock: 28062900
+      startBlock: 35630000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -42,11 +42,11 @@ dataSources:
 
   - kind: ethereum
     name: ProtocolRegistry
-    network: base-sepolia
+    network: base
     source:
-      address: "0x811Ad5f758DB53d8dD3B18890a0cfe5a389e3C72"
+      address: "0xA21bb7B0A56f8d8C8b102Df5C7DDB6D3108546a1"
       abi: ProtocolRegistry
-      startBlock: 28062300
+      startBlock: 35630000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -74,7 +74,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: AssetPool
-    network: base-sepolia
+    network: base
     source:
       abi: AssetPool
     mapping:
@@ -116,7 +116,7 @@ templates:
 
   - kind: ethereum
     name: PoolCycleManager
-    network: base-sepolia
+    network: base
     source:
       abi: PoolCycleManager
     mapping:
@@ -148,7 +148,7 @@ templates:
 
   - kind: ethereum
     name: PoolLiquidityManager
-    network: base-sepolia
+    network: base
     source:
       abi: PoolLiquidityManager
     mapping:
@@ -200,7 +200,7 @@ templates:
 
   - kind: ethereum
     name: XToken
-    network: base-sepolia
+    network: base
     source:
       abi: XToken
     mapping:
@@ -216,7 +216,7 @@ templates:
 
   - kind: ethereum
     name: AssetOracle
-    network: base-sepolia
+    network: base
     source:
       abi: AssetOracle
     mapping:
@@ -240,7 +240,7 @@ templates:
 
   - kind: ethereum
     name: ERC20
-    network: base-sepolia
+    network: base
     source:
       abi: ERC20
     mapping:
@@ -256,7 +256,7 @@ templates:
 
   - kind: ethereum
     name: DefaultPoolStrategy
-    network: base-sepolia
+    network: base
     source:
       abi: DefaultPoolStrategy
     mapping:
