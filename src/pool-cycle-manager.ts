@@ -124,15 +124,15 @@ export function handleRebalanceInitiated(event: RebalanceInitiated): void {
   // If state is POOL_REBALANCING_ONCHAIN, fetch high/low prices
   if (cycleState == 2) {
     let contract = PoolCycleManager.bind(cycleManagerAddress);
-    let highCall = contract.try_cyclePriceHigh();
-    let lowCall = contract.try_cyclePriceLow();
+    let openCall = contract.try_cyclePriceOpen();
+    let closeCall = contract.try_cyclePriceClose();
 
-    if (!highCall.reverted) {
-      pool.cyclePriceHigh = highCall.value;
+    if (!openCall.reverted) {
+      pool.cyclePriceOpen = openCall.value;
     }
 
-    if (!lowCall.reverted) {
-      pool.cyclePriceLow = lowCall.value;
+    if (!closeCall.reverted) {
+      pool.cyclePriceClose = closeCall.value;
     }
   }
 

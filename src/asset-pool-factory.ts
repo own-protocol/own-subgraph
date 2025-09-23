@@ -165,8 +165,8 @@ export function handleAssetPoolCreated(event: AssetPoolCreatedEvent): void {
   pool.cycleState = "POOL_ACTIVE";
   pool.cycleIndex = BigInt.fromI32(1);
   pool.lastCycleActionDateTime = event.block.timestamp;
-  pool.cyclePriceHigh = BigInt.fromI32(0);
-  pool.cyclePriceLow = BigInt.fromI32(0);
+  pool.cyclePriceOpen = BigInt.fromI32(0);
+  pool.cyclePriceClose = BigInt.fromI32(0);
   pool.cycleInterestAmount = BigInt.fromI32(0);
   pool.rebalancedLPs = BigInt.fromI32(0);
   pool.prevRebalancePrice = BigInt.fromI32(0);

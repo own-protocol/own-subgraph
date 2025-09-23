@@ -39,8 +39,8 @@ type Pool @entity(immutable: false) {
   cycleState: String # enum: POOL_ACTIVE, POOL_REBALANCING_OFFCHAIN, POOL_REBALANCING_ONCHAIN, POOL_HALTED
   cycleIndex: BigInt!
   lastCycleActionDateTime: BigInt
-  cyclePriceHigh: BigInt
-  cyclePriceLow: BigInt
+  cyclePriceOpen: BigInt
+  cyclePriceClose: BigInt
   cycleInterestAmount: BigInt
   rebalancedLPs: BigInt!
   prevRebalancePrice: BigInt!
