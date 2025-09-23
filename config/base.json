@@ -1,0 +1,11 @@
+{
+  "network": "base",
+  "AssetPoolFactory": {
+    "address": "0x7dFC74B1dAfd918D66B35E5237C7A5b170710386",
+    "startBlock": 35630000
+  },
+  "ProtocolRegistry": {
+    "address": "0xA21bb7B0A56f8d8C8b102Df5C7DDB6D3108546a1",
+    "startBlock": 35630000
+  }
+}
