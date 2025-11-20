@@ -22,11 +22,8 @@ type Pool @entity(immutable: false) {
   assetSupply: BigInt
   reserveBackingAsset: BigInt
   aggregatePoolReserves: BigInt
-  totalUserDeposits: BigInt
-  totalUserCollateral: BigInt
   cycleTotalDeposits: BigInt
   cycleTotalRedemptions: BigInt
-  reserveYieldIndex: BigInt
 
   # Liquidity Manager Data
   totalLPLiquidityCommited: BigInt!

@@ -68,21 +68,10 @@ function updatePoolData(poolAddress: Address, timestamp: BigInt): void {
   let assetPoolContract = AssetPool.bind(poolAddress);
 
   // Update all pool metrics
-  let totalUserDepositsCall = assetPoolContract.try_totalUserDeposits();
-  let totalUserCollateralCall = assetPoolContract.try_totalUserCollateral();
   let reserveBackingAssetCall = assetPoolContract.try_reserveBackingAsset();
   let aggregatePoolReservesCall = assetPoolContract.try_aggregatePoolReserves();
   let cycleTotalDepositsCall = assetPoolContract.try_cycleTotalDeposits();
   let cycleTotalRedemptionsCall = assetPoolContract.try_cycleTotalRedemptions();
-  let reserveYieldIndexCall = assetPoolContract.try_reserveYieldIndex();
-
-  if (!totalUserDepositsCall.reverted) {
-    pool.totalUserDeposits = totalUserDepositsCall.value;
-  }
-
-  if (!totalUserCollateralCall.reverted) {
-    pool.totalUserCollateral = totalUserCollateralCall.value;
-  }
 
   if (!reserveBackingAssetCall.reverted) {
     pool.reserveBackingAsset = reserveBackingAssetCall.value;
@@ -98,10 +87,6 @@ function updatePoolData(poolAddress: Address, timestamp: BigInt): void {
 
   if (!cycleTotalRedemptionsCall.reverted) {
     pool.cycleTotalRedemptions = cycleTotalRedemptionsCall.value;
-  }
-
-  if (!reserveYieldIndexCall.reverted) {
-    pool.reserveYieldIndex = reserveYieldIndexCall.value;
   }
 
   // Update asset supply
