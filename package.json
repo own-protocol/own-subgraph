@@ -3,10 +3,10 @@
   "license": "MIT",
   "scripts": {
     "codegen": "graph codegen",
-    "build": "graph build",
     "prepare:base-sepolia": "mustache config/base-sepolia.json subgraph.template.yaml > subgraph.yaml",
     "prepare:sepolia": "mustache config/sepolia.json subgraph.template.yaml > subgraph.yaml",
     "prepare:base": "mustache config/base.json subgraph.template.yaml > subgraph.yaml",
+    "build": "graph build",
     "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ own-subgraph",
     "deploy-goldsky": "goldsky subgraph deploy own-subgraph-base/1.0.0 --path .",
     "create-local": "graph create --node http://localhost:8020/ own-subgraph",
