@@ -1,11 +1,11 @@
 {
   "network": "base-sepolia",
   "AssetPoolFactory": {
-    "address": "0x0500Dd55bA807ee9fEb8dB46F6bd8831E2a86251",
-    "startBlock": 32430300
+    "address": "0xC0166Fd0F9269B7031477C8098E27E8dDb761D54",
+    "startBlock": 33901100
   },
   "ProtocolRegistry": {
-    "address": "0x8BE9b8cC39e3974690E5BbABe16b4a52D1BF3897",
-    "startBlock": 32430300
+    "address": "0xdE65370F905999eaEC9a3612874752C301324cF7",
+    "startBlock": 33901100
   }
 }
